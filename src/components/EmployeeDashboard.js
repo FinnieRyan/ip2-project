@@ -7,6 +7,7 @@ import axios from 'axios';
 const EmployeeDashboard = () => { 
   //Declare state variable courses and its setter
   const [courses, setCourses] = useState([]);
+  const [employeeInfo, setEmployeeInfo] = useState([]);
 
   // Retrieve user data from local storage
   const user = JSON.parse(localStorage.getItem('user'));
@@ -33,10 +34,30 @@ const EmployeeDashboard = () => {
         console.log('Error fetching courses:', error);
       }
     };
+
+    const fetchEmployeedata = async () => {
+      try {
+          console.log(user);
+          if (user && token){
+            const response = await axios.get('http://localhost:5000/api/employee', {
+              headers : {
+                Authorization: `Bearer ${token}`,
+              },
+              });
+              
+              const { data } = response;
+              setEmployeeInfo(data);
+            }
+          } catch (error) {
+            console.error('Error fetching employee data:', error);
+          }
+      };
+  
       
     // Trigger the fetchCourses function function when the token changes 
     if (user && token) {
       fetchCourses();
+      fetchEmployeedata();
     }
   }, [token]);
 
@@ -48,7 +69,7 @@ const EmployeeDashboard = () => {
   //render UI 
   return (
     <div className="employee-dashboard">
-      <h2>Welcome, {user.username}!</h2>
+      <h2>Welcome, {employeeInfo.firstname}!</h2>
       <p>Job role: {user.role}</p>
       <p>Here are some courses you might be interested in:</p>
       <CourseList courses={courses} />

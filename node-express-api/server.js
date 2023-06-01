@@ -2,11 +2,12 @@ const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const mongoose = require('mongoose');
 const cors = require('koa-cors');
-const authService = require('../src/services/authService'); 
+const authService = require('../src/services/authService'); //Import auth service 
 const User = require('../src/models/user_model'); // Import the User model
 const Course = require('../src/models/course_model'); // Import the Course model
 const Manager = require('../src/models/manager_model'); // Import the manager model
-const jwt = require('jsonwebtoken')
+const Employee = require('../src/models/employee_model');// Import Employee model 
+const jwt = require('jsonwebtoken') //Import token 
 
 
 const app = new Koa();
@@ -74,6 +75,33 @@ app.use(async (ctx, next) => {
       console.error('Error retrieving manager data:', error);
       ctx.status = 500;
       ctx.body = { error: 'Error retrieving manager data' };
+    }
+  } else {
+    await next();
+  }
+});
+
+app.use(async (ctx, next) => {
+  if (ctx.path === '/api/employee'){
+    try {
+      console.log('Inside /api/employee route');
+      // Retrieve the manager data from the database based on the authenticated user's managerId
+      const user = await User.findOne({ _id: ctx.state.user._id });
+      console.log('User:', user); // Log the user object
+
+      const employee = await Employee.findOne({ _id: user.employee_Id });
+      console.log('employee', employee);
+      if (!employee) {
+        ctx.status = 404;
+        ctx.body = {error: 'Employee not found'};
+        return;
+      }
+      ctx.status = 200;
+      ctx.body = employee;
+    } catch (error) {
+      console.error('Error retrieving employee data ', error);
+      ctx.status = 500;
+      ctx.body = { error: 'Error retrieving employee data'}
     }
   } else {
     await next();
