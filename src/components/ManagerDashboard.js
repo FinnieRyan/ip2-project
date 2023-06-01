@@ -69,8 +69,9 @@ const ManagerDashboard = () => {
   // Render manager dashboard UI
   return (
     <div className="manager-dashboard">
-      <h2>Welcome, {user.username}!</h2>
+      <h2>Welcome, {managerInfo.firstname}!</h2>
       <p>Job role: {user.role}</p>
+      <p>Department: {managerInfo.department}</p>
       <p>Here are all the courses currently in the system:</p>
       <CourseList courses={courses} />
     </div>

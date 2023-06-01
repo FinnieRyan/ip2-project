@@ -56,9 +56,11 @@ app.use(async (ctx, next) => {
     try {
       console.log('Inside /api/manager route');
       // Retrieve the manager data from the database based on the authenticated user's managerId
-      const user = await User.findOne({ manager_Id: ctx.state.user.manager_Id });
+      const user = await User.findOne({ _id: ctx.state.user._id });
       console.log('User:', user); // Log the user object
-      const manager = user.manager_Id;
+      
+      // Retrieve the manager data from the Managers collection using the user's manager_Id
+      const manager = await Manager.findOne({ _id: user.manager_Id });
       console.log('Manager:', manager); // Log the retrieved manager object
       if (!manager) {
         ctx.status = 404;
