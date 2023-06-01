@@ -5,19 +5,24 @@ import styled from 'styled-components';
 
 const DashboardContainer = styled.div`
   width: 90%;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  box-shadow: 0px 0px 20px rgba(0,0,0,0.1);
 `;
 
 const Heading = styled.h2`
   color: #333;
   margin-bottom: 20px;
+  font-size: 2.5em;
 `;
 
 const Text = styled.p`
   color: #666;
   line-height: 1.6;
+  font-size: 1.5em;
 `;
 
 
