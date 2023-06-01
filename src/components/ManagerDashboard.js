@@ -1,6 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import CourseList from './CourseList';
+import styled from 'styled-components';
+
+const DashboardContainer = styled.div`
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+`;
+
+const Heading = styled.h2`
+  color: #333;
+  margin-bottom: 20px;
+`;
+
+const Text = styled.p`
+  color: #666;
+  line-height: 1.6;
+`;
 
 
 
@@ -68,13 +86,13 @@ const ManagerDashboard = () => {
 
   // Render manager dashboard UI
   return (
-    <div className="manager-dashboard">
-      <h2>Welcome, {managerInfo.firstname}!</h2>
-      <p>Job role: {user.role}</p>
-      <p>Department: {managerInfo.department}</p>
-      <p>Here are all the courses currently in the system:</p>
+    <DashboardContainer>
+      <Heading>Welcome, {managerInfo.firstname}!</Heading>
+      <Text>Job role: {user.role}</Text>
+      <Text>Department: {managerInfo.department}</Text>
+      <Text>Here are all the courses currently in the system:</Text>
       <CourseList courses={courses} />
-    </div>
+    </DashboardContainer>
   );
 };
 

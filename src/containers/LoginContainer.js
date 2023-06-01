@@ -2,8 +2,14 @@ import React, { useState,useEffect } from 'react';
 import LoginForm from '../components/LoginForm';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
-
+const StyledLoginContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+`;
 
 function LoginContainer() {
   const [username, setUsername] = useState('');
@@ -45,13 +51,15 @@ function LoginContainer() {
   };
 
   return (
-    <LoginForm
-      username={username}
-      onUsernameChange={setUsername}
-      password={password}
-      onPasswordChange={setPassword}
-      onLogin={handleLogin}
-    />
+    <StyledLoginContainer>
+      <LoginForm
+        username={username}
+        onUsernameChange={setUsername}
+        password={password}
+        onPasswordChange={setPassword}
+        onLogin={handleLogin}
+      />
+    </StyledLoginContainer>
   );
 }
 
