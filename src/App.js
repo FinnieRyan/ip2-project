@@ -8,21 +8,23 @@ import RolesContainer from './containers/RolesContainer';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import ManagerDashboard from './components/ManagerDashboard';
 import LoginContainer from './containers/LoginContainer';
+//import NavBar from './components/Navbar';
+import MainLayout from './components/MainLayout';
 
 function App() {
   return (
-   
-      <Router>
-        <Routes>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LoginContainer />} />
+        <Route element={<MainLayout />}>
           <Route path="/courses" element={<CourseContainer />} />
           <Route path="/employees" element={<EmployeesContainer />} />
           <Route path="/roles" element={<RolesContainer />} />
           <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
           <Route path="/manager-dashboard" element={<ManagerDashboard />} />
-          <Route path="/" element={<LoginContainer />} />
-        </Routes>
-      </Router>
-    
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 

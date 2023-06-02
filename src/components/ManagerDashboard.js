@@ -84,7 +84,7 @@ const ManagerDashboard = () => {
     }
   }, [token]);
 
-  // If user or user.token is not present, show loading message
+  // If user or user or token is not present, show loading message
   if (!user || !token) {
     return <p>Loading...</p>;
   }
