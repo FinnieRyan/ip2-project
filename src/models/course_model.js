@@ -13,7 +13,12 @@ const courseSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  departments: [{
+    type: String,
+    required: true,
+  }],
 });
+
 
 const Course = mongoose.model('Course', courseSchema,);
 

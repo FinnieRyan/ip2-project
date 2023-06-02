@@ -45,10 +45,14 @@ const ManagerDashboard = () => {
 
         // Check if user exists and has a token
         if (user && token) {
-          // Make an API call to fetch the courses data
+          await fetchManagersdata();
+          
+          console.log('Manager Info:', managerInfo);
+          console.log('Departments:', managerInfo.department);
           const response = await axios.get('http://localhost:5000/api/course', {
             headers: {
-              Authorization: `Bearer ${token}`, // Include the token in the request headers
+              Authorization: `Bearer ${token}`, //put the token in the header
+              departments: managerInfo.department,
             },
           });
 
@@ -82,7 +86,7 @@ const ManagerDashboard = () => {
       fetchCourses();
       fetchManagersdata();
     }
-  }, [token]);
+  }, [token,managerInfo.department]);
 
   // If user or user or token is not present, show loading message
   if (!user || !token) {

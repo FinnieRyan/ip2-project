@@ -111,8 +111,16 @@ app.use(async (ctx, next) => {
 app.use(async (ctx, next) => {
   if (ctx.path === '/api/course') {
     try {
-      // Retrieve all courses from the database
-      const courses = await Course.find();
+      const departments = ctx.request.headers.departments; // Retrieve the departments from the request headers
+      let courses = [];
+
+      if (departments) {
+        // If departments are provided in the request headers, filter the courses based on the departments
+        courses = await Course.find({ departments: { $in: departments } });
+      } else {
+        // If no departments are provided, retrieve all courses
+        courses = await Course.find();
+      }
 
       ctx.status = 200;
       ctx.body = courses;

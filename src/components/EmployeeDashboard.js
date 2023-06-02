@@ -36,6 +36,7 @@ const EmployeeDashboard = () => {
   const user = JSON.parse(localStorage.getItem('user'));
   const token = localStorage.getItem('myToken');
   console.log(token);
+  
 
   useEffect(() => {
     //fecthing the course data
@@ -45,12 +46,19 @@ const EmployeeDashboard = () => {
 
         //check if the user has a valid token
         if (user && token) {
+           await fetchEmployeedata();
+          
+          console.log('Employee Info:', employeeInfo);
+          console.log('Departments:', employeeInfo.department);
           const response = await axios.get('http://localhost:5000/api/course', {
             headers: {
               Authorization: `Bearer ${token}`, //put the token in the header
+              departments: employeeInfo.department,
             },
           });
+          
           const {data} = response;
+          console.log('Fetched Courses:', data);
           setCourses(data) // update the state of the courses with the fetched data from the database
         }
       } catch (error) {
@@ -82,7 +90,7 @@ const EmployeeDashboard = () => {
       fetchCourses();
       fetchEmployeedata();
     }
-  }, [token]);
+  }, [token,employeeInfo.department]);
 
   // If the user ot token are not present they will be presneted with a loading... page
   if (!user && !token) {
