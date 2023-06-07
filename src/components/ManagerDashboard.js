@@ -16,16 +16,29 @@ const DashboardContainer = styled.div`
 const Heading = styled.h2`
   color: #333;
   margin-bottom: 20px;
-  font-size: 2.5em;
+  font-size: 2.8em;
+  text-transform: uppercase;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 `;
 
 const Text = styled.p`
   color: #666;
   line-height: 1.6;
   font-size: 1.5em;
+  font-weight: 300;
+  margin-bottom: 20px;
 `;
 
+const RoleText = styled(Text)`
+  color: #007bff;
+  font-weight: 500;
+`;
 
+const DepartmentText = styled(Text)`
+  color: #28a745;
+  font-weight: 500;
+`;
 
 const ManagerDashboard = () => {
   // Declare state variable courses and its setter function
@@ -35,20 +48,15 @@ const ManagerDashboard = () => {
   // Retrieve user data from local storage
   const user = JSON.parse(localStorage.getItem('user'));
   const token = localStorage.getItem('myToken');
-  //console.log(token);
 
   useEffect(() => {
     // Function to fetch courses data
     const fetchCourses = async () => {
       try {
-        //console.log(user);
-
         // Check if user exists and has a token
         if (user && token) {
           await fetchManagersdata();
-          
-          //console.log('Manager Info:', managerInfo);
-          //console.log('Departments:', managerInfo.department);
+
           const response = await axios.get('http://localhost:5000/api/course', {
             headers: {
               Authorization: `Bearer ${token}`, //put the token in the header
@@ -66,27 +74,26 @@ const ManagerDashboard = () => {
 
     const fetchManagersdata = async () => {
       try {
-          //console.log(user);
-          if (user && token){
-            const response = await axios.get('http://localhost:5000/api/manager', {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            const { data } = response;
-            setManagerInfo(data);
-          }
-          } catch (error) {
-            console.error('Error fetching manager data:', error);
-          }
-      };
+        if (user && token){
+          const response = await axios.get('http://localhost:5000/api/manager', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const { data } = response;
+          setManagerInfo(data);
+        }
+      } catch (error) {
+        console.error('Error fetching manager data:', error);
+      }
+    };
 
     // Trigger the fetchCourses function when user or user.token changes
     if (user && token) {
       fetchCourses();
       fetchManagersdata();
     }
-  }, [token,managerInfo.department]);
+  }, [token, managerInfo.department]);
 
   // If user or user or token is not present, show loading message
   if (!user || !token) {
@@ -97,8 +104,8 @@ const ManagerDashboard = () => {
   return (
     <DashboardContainer>
       <Heading>Welcome, {managerInfo.firstname}!</Heading>
-      <Text>Job role: {user.role}</Text>
-      <Text>Department: {managerInfo.department}</Text>
+      <RoleText>Job role: {user.role}</RoleText>
+      <DepartmentText>Department: {managerInfo.department}</DepartmentText>
       <Text>Here are all the courses currently in the system:</Text>
       <CourseList courses={courses} />
     </DashboardContainer>
