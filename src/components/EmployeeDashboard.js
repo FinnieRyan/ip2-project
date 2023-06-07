@@ -42,14 +42,12 @@ const EmployeeDashboard = () => {
     //fecthing the course data
     const fetchCourses = async () => {
       try {
-        console.log(user);
-
         //check if the user has a valid token
         if (user && token) {
            await fetchEmployeedata();
           
-          console.log('Employee Info:', employeeInfo);
-          console.log('Departments:', employeeInfo.department);
+          //console.log('Employee Info:', employeeInfo);
+          //console.log('Departments:', employeeInfo.department);
           const response = await axios.get('http://localhost:5000/api/course', {
             headers: {
               Authorization: `Bearer ${token}`, //put the token in the header
@@ -58,7 +56,7 @@ const EmployeeDashboard = () => {
           });
           
           const {data} = response;
-          console.log('Fetched Courses:', data);
+          //console.log('Fetched Courses:', data);
           setCourses(data) // update the state of the courses with the fetched data from the database
         }
       } catch (error) {
@@ -68,7 +66,7 @@ const EmployeeDashboard = () => {
 
     const fetchEmployeedata = async () => {
       try {
-          console.log(user);
+          //console.log(user);
           if (user && token){
             const response = await axios.get('http://localhost:5000/api/employee', {
               headers : {

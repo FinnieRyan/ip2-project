@@ -35,20 +35,20 @@ const ManagerDashboard = () => {
   // Retrieve user data from local storage
   const user = JSON.parse(localStorage.getItem('user'));
   const token = localStorage.getItem('myToken');
-  console.log(token);
+  //console.log(token);
 
   useEffect(() => {
     // Function to fetch courses data
     const fetchCourses = async () => {
       try {
-        console.log(user);
+        //console.log(user);
 
         // Check if user exists and has a token
         if (user && token) {
           await fetchManagersdata();
           
-          console.log('Manager Info:', managerInfo);
-          console.log('Departments:', managerInfo.department);
+          //console.log('Manager Info:', managerInfo);
+          //console.log('Departments:', managerInfo.department);
           const response = await axios.get('http://localhost:5000/api/course', {
             headers: {
               Authorization: `Bearer ${token}`, //put the token in the header
@@ -66,7 +66,7 @@ const ManagerDashboard = () => {
 
     const fetchManagersdata = async () => {
       try {
-          console.log(user);
+          //console.log(user);
           if (user && token){
             const response = await axios.get('http://localhost:5000/api/manager', {
               headers: {

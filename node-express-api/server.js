@@ -2,6 +2,7 @@ const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const mongoose = require('mongoose');
 const cors = require('koa-cors');
+const Router = require('@koa/router');
 const authService = require('../src/services/authService'); //Import auth service 
 const User = require('../src/models/user_model'); // Import the User model
 const Course = require('../src/models/course_model'); // Import the Course model
@@ -10,11 +11,142 @@ const Employee = require('../src/models/employee_model');// Import Employee mode
 const jwt = require('jsonwebtoken') //Import token 
 
 
+
 const app = new Koa();
+const router = new Router();
 const port = 5000;
 
 app.use(cors());
 app.use(bodyParser());
+
+//new /enroll route
+router.put('/enroll',async ctx => {
+  try{
+    const user = await User.findOne({_id: ctx.state.user._id});
+    const {courseId} = ctx.request.body;
+    const course = await Course.findOne({_id:courseId});
+    const employee = await Employee.findOne({_id: user.employee_Id});
+
+    // Check if course exists
+    if(!course){
+      ctx.status = 404;
+      ctx.body = { error: 'course not found'};
+      return;
+    }
+
+    // Check if the employee is already enrolled 
+    if(employee.courses.includes(course._id)) {
+      ctx.status = 404;
+      ctx.body = { error: 'Already enrolled on course'};
+      return;
+    }
+
+    //enroll the employee to the course 
+    employee.courses.push(course._id);
+    await employee.save()
+    ctx.status = 200; 
+    ctx.body = {success: 'successfully enrolled in course'};
+  } catch (error) {
+    console.error('Error enrolling in course:', error); 
+    ctx.status = 500;
+    ctx.body = {error: 'Error enrolling in course'};
+  }
+})
+
+// new /unenroll route
+router.put('/unenroll',async ctx => {
+  try{
+    const user = await User.findOne({_id: ctx.state.user._id});
+    const {courseId} = ctx.request.body;
+    const course = await Course.findOne({_id:courseId});
+    const employee = await Employee.findOne({_id: user.employee_Id});
+
+    // Check if course exists
+    if(!course){
+      ctx.status = 404;
+      ctx.body = { error: 'Course not found'};
+      return;
+    }
+
+    // Check if the employee is not enrolled 
+    if(!employee.courses.includes(course._id)) {
+      ctx.status = 404;
+      ctx.body = { error: 'Employee not enrolled on this course'};
+      return;
+    }
+
+    // Unenroll the employee from the course 
+    const index = employee.courses.indexOf(course._id);
+    if (index > -1) {
+      employee.courses.splice(index, 1);
+    }
+    await employee.save()
+    ctx.status = 200; 
+    ctx.body = {success: 'Successfully unenrolled from course'};
+  } catch (error) {
+    console.error('Error unenrolling from course:', error); 
+    ctx.status = 500;
+    ctx.body = {error: 'Error unenrolling from course'};
+  }
+})
+router.put('/manager/enroll', async ctx => {
+  try {
+    const {employeeId, courseId} = ctx.request.body;
+    const course = await Course.findOne({_id:courseId});
+    const employee = await Employee.findOne({_id: employeeId});
+
+    if(!course){
+      ctx.status = 404;
+      ctx.body = { error: 'Course not found'};
+      return;
+    }
+
+    if(employee.courses.includes(course._id)) {
+      ctx.status = 404;
+      ctx.body = { error: 'Already enrolled in course'};
+      return;
+    }
+
+    employee.courses.push(course._id);
+    await employee.save()
+    ctx.status = 200; 
+    ctx.body = {success: 'Successfully enrolled employee in course'};
+  } catch (error) {
+    console.error('Error enrolling employee in course:', error); 
+    ctx.status = 500;
+    ctx.body = {error: 'Error enrolling employee in course'};
+  }
+})
+
+router.put('/manager/unenroll', async ctx => {
+  try {
+    const {employeeId, courseId} = ctx.request.body;
+    const course = await Course.findOne({_id:courseId});
+    const employee = await Employee.findOne({_id: employeeId});
+
+    if(!course){
+      ctx.status = 404;
+      ctx.body = { error: 'Course not found'};
+      return;
+    }
+
+    if(!employee.courses.includes(course._id)) {
+      ctx.status = 404;
+      ctx.body = { error: 'Employee is not enrolled in this course'};
+      return;
+    }
+
+    employee.courses = employee.courses.filter(id => id.toString() !== course._id.toString());
+    await employee.save()
+    ctx.status = 200; 
+    ctx.body = {success: 'Successfully unenrolled employee from course'};
+  } catch (error) {
+    console.error('Error unenrolling employee from course:', error); 
+    ctx.status = 500;
+    ctx.body = {error: 'Error unenrolling employee from course'};
+  }
+})
+
 
 
 app.use(async (ctx, next) => {
@@ -30,6 +162,7 @@ app.use(async (ctx, next) => {
 // Mount the authService middleware
 app.use(authService.router.routes());
 app.use(authService.authenticate);
+app.use(router.routes());
 
 // GET /api/user route to retrieve user data
 app.use(async (ctx, next) => {
@@ -107,6 +240,58 @@ app.use(async (ctx, next) => {
     await next();
   }
 });
+
+app.use(async (ctx, next) => {
+  if (ctx.path === '/api/all/employees') {
+    try {
+      console.log('Inside /api/employees route');
+
+      // Retrieve the JWT token from the request header
+      const authHeader = ctx.request.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        ctx.status = 401;
+        ctx.body = { error: 'Missing or invalid authorization header' };
+        return;
+      }
+
+      const token = authHeader.split(' ')[1];
+      
+      // Verify and decode the JWT token to get the manager ID
+      let decodedToken;
+      try {
+        decodedToken = jwt.verify(token, 'secretKey');
+      } catch (error) {
+        ctx.status = 401;
+        ctx.body = { error: 'Invalid token' };
+        return;
+      }
+
+      const managerId = decodedToken.managerId;
+      console.log('Manager ID:', managerId); // Log the manager ID
+
+      // Retrieve employees associated with the manager
+      const employees = await Employee.find({ manager_id: managerId });
+
+      console.log('Employees:', employees); // Log the employees object
+
+      if (!employees || employees.length === 0) {
+        ctx.status = 404;
+        ctx.body = { error: 'No employees found' };
+        return;
+      }
+
+      ctx.status = 200;
+      ctx.body = employees;
+    } catch (error) {
+      console.error('Error retrieving employees data', error);
+      ctx.status = 500;
+      ctx.body = { error: 'Error retrieving employees data' };
+    }
+  } else {
+    await next();
+  }
+});
+
 
 app.use(async (ctx, next) => {
   if (ctx.path === '/api/course') {

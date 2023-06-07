@@ -18,30 +18,30 @@ function LoginContainer() {
 
   const handleLogin = async () => {
     try {
-      console.log('handle login');
-      console.log('Username:', username);
-      console.log('Password:', password);
+      //console.log('handle login');
+      //console.log('Username:', username);
+      //console.log('Password:', password);
       const response = await axios.post('http://localhost:5000/login', { username, password });
-      console.log('Response headers:', response.headers); 
+      //console.log('Response headers:', response.headers); 
       // handle successful login here (store user in local storage, navigate to different page, etc.)
-      console.log('Login response:', response.data);
+      //console.log('Login response:', response.data);
 
       const { user } = response.data;
-      console.log('User:', user);
+      //console.log('User:', user);
       //console.log('Role:', user.role);
-      console.log(response.headers);
+      //console.log(response.headers);
       const token = response.headers.authorization.split(' ')[1];
-      console.log(token);
+      //console.log(token);
       localStorage.setItem('myToken', token);
       
       
       console.log(user.role);
       if (user.role === 'employee') {
-        console.log('Employee login successful');
+        //console.log('Employee login successful');
         localStorage.setItem('user', JSON.stringify(user)); // Store the user in local storage
         navigate('/employee-dashboard'); // Navigate to the employee dashboard
       } else if (user.role === 'manager') {
-        console.log('Manager login successful');
+        //console.log('Manager login successful');
         localStorage.setItem('user', JSON.stringify(user)); // Store the user in local storage
         navigate('/manager-dashboard'); // Navigate to the manager dashboard
       }

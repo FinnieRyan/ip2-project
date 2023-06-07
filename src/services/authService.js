@@ -2,6 +2,7 @@ const Router = require('koa-router');
 const axios = require('axios');
 const User = require('../models/user_model'); // Update the path to the userModel file
 const jwt = require('jsonwebtoken');
+const Manager = require('../models/manager_model');
 
 
 const router = new Router();
@@ -48,13 +49,13 @@ const authenticate = async (ctx, next) => {
 // POST /login
 router.post('/login', async (ctx) => {
   const { username, password } = ctx.request.body;
-  console.log('Inside /login route');
-  console.log('Username:', username);
-  console.log('Password:', password);
+  //console.log('Inside /login route');
+  //console.log('Username:', username);
+  //console.log('Password:', password);
 
   try {
     // Find the user in the database
-    const user = await User.findOne({ username: username }); // Ensure username is passed as a string
+    const user = await User.findOne({ username: username });
 
     // If user is not found or password is incorrect, respond with authentication failure
     if (!user || user.password !== password) {
@@ -62,9 +63,26 @@ router.post('/login', async (ctx) => {
       ctx.body = { error: 'Invalid username or password' };
       return;
     }
+    console.log("user role:", user.role);
+    let managerId;
+      if (user.role === 'manager') {
+        if (user.manager_Id) {
+          managerId = user.manager_Id;
+        } else {
+          ctx.status = 401;
+          ctx.body = { error: 'Manager not found for the given user' };
+          return;
+        }
+      }
+
+      console.log("managerId:", managerId);
 
     // Generate a JWT token
-    const token = jwt.sign({ userId: user._id }, 'secretKey', { expiresIn: '1h' });
+    const tokenPayload = { userId: user._id };
+    if (managerId) {
+      tokenPayload.managerId = managerId;
+    }
+    const token = jwt.sign(tokenPayload, 'secretKey', { expiresIn: '1h' });
 
     // Set the token in the response headers
     ctx.set('Authorization', `Bearer ${token}`);
@@ -85,6 +103,7 @@ module.exports = {
   router,
   authenticate,
 };
+
 
 
 
