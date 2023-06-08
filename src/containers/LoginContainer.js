@@ -2,13 +2,37 @@ import React, { useState,useEffect } from 'react';
 import LoginForm from '../components/LoginForm';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+`;
 
 const StyledLoginContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+`;
+
+const Title = styled.h1`
+  color: #fff;
+  font-size: 2em;
+  text-align: center;
+  animation: ${fadeIn} 2s ease-in;
+  margin-bottom: 20px;
+`;
+const ContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 function LoginContainer() {
@@ -52,13 +76,16 @@ function LoginContainer() {
 
   return (
     <StyledLoginContainer>
-      <LoginForm
-        username={username}
-        onUsernameChange={setUsername}
-        password={password}
-        onPasswordChange={setPassword}
-        onLogin={handleLogin}
-      />
+      <ContentWrapper>
+        <Title>Welcome to E-Train Training Portal!</Title>
+        <LoginForm
+          username={username}
+          onUsernameChange={setUsername}
+          password={password}
+          onPasswordChange={setPassword}
+          onLogin={handleLogin}
+        />
+      </ContentWrapper>
     </StyledLoginContainer>
   );
 }

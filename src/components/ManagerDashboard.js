@@ -19,11 +19,11 @@ const DashboardContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px;
-  background-color: #f5f5f5;
   border-radius: 10px;
   box-shadow: 0px 0px 20px rgba(0,0,0,0.1);
   opacity: 0;
   animation: ${slideInFromLeft} 2s both;
+  background-color: #e0f0ff;
 `;
 
 const Heading = styled.h2`
@@ -36,7 +36,7 @@ const Heading = styled.h2`
 `;
 
 const Text = styled.p`
-  color: #666;
+  color: #333;
   line-height: 1.6;
   font-size: 1.5em;
   font-weight: 300;
@@ -44,13 +44,17 @@ const Text = styled.p`
 `;
 
 const RoleText = styled(Text)`
-  color: #007bff;
+  color: #333;
   font-weight: 500;
 `;
 
 const DepartmentText = styled(Text)`
-  color: #28a745;
+  color: #333;
   font-weight: 500;
+`;
+const Background = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
 `;
 
 const ManagerDashboard = () => {
@@ -115,6 +119,7 @@ const ManagerDashboard = () => {
 
   // Render manager dashboard UI
   return (
+    <Background>
     <DashboardContainer>
       <Heading>Welcome, {managerInfo.firstname}!</Heading>
       <RoleText>Job role: {user.role}</RoleText>
@@ -122,6 +127,7 @@ const ManagerDashboard = () => {
       <Text>Here are all the courses currently in the system:</Text>
       <CourseList courses={courses} />
     </DashboardContainer>
+  </Background>
   );
 };
 
