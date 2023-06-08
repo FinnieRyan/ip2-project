@@ -4,16 +4,16 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 
 const CourseBox = styled.div`
-  border: 1px solid #ddd;
+  border: 1px solid #b3d1ff;
   margin-bottom: 15px;
   padding: 30px;
   border-radius: 5px;
-  background-color: #e6f7ff;  /* light blue color */
+  background-color: #cce4ff;  /* slightly deeper blue color */
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 0.5em 0.5em -0.4em #b3d1ff;  /* light blue shadow */
+    box-shadow: 0 0.5em 0.5em -0.4em #99ccff;  /* deeper blue shadow */
   }
 `;
 
