@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import CourseList from './CourseList';
 import axios from 'axios';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
+const slideInFromLeft = keyframes`
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+`;
 const DashboardContainer = styled.div`
   width: 90%;
   max-width: 1200px;
@@ -11,19 +22,40 @@ const DashboardContainer = styled.div`
   background-color: #f5f5f5;
   border-radius: 10px;
   box-shadow: 0px 0px 20px rgba(0,0,0,0.1);
+  opacity: 0;
+  animation: ${slideInFromLeft} 2s both;
 `;
 
 const Heading = styled.h2`
   color: #333;
   margin-bottom: 20px;
-  font-size: 2.5em;
+  font-size: 2.8em;
+  text-transform: uppercase;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  
 `;
 
 const Text = styled.p`
   color: #666;
   line-height: 1.6;
   font-size: 1.5em;
+  font-weight: 300;
+  margin-bottom: 20px;
+  
 `;
+const RoleText = styled(Text)`
+  color: #007bff;
+  font-weight: 500;
+ 
+`;
+
+const DepartmentText = styled(Text)`
+  color: #28a745;
+  font-weight: 500;
+  
+`;
+
 
 
 
@@ -99,8 +131,8 @@ const EmployeeDashboard = () => {
   return (
     <DashboardContainer>
       <Heading>Welcome, {employeeInfo.firstname}!</Heading>
-      <Text>Job role: {user.role}</Text>
-      <Text>Department: {employeeInfo.department}</Text>
+      <RoleText>Job role: {user.role}</RoleText>
+      <DepartmentText>Department: {employeeInfo.department}</DepartmentText>
       <Text>Here are all the courses currently in the system:</Text>
       <CourseList courses={courses} />
     </DashboardContainer>

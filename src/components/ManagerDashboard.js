@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import CourseList from './CourseList';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
+const slideInFromLeft = keyframes`
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+`;
 const DashboardContainer = styled.div`
   width: 90%;
   max-width: 1200px;
@@ -11,6 +22,8 @@ const DashboardContainer = styled.div`
   background-color: #f5f5f5;
   border-radius: 10px;
   box-shadow: 0px 0px 20px rgba(0,0,0,0.1);
+  opacity: 0;
+  animation: ${slideInFromLeft} 2s both;
 `;
 
 const Heading = styled.h2`
