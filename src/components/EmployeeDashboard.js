@@ -72,7 +72,7 @@ const EmployeeDashboard = () => {
   // Retrieve user data from local storage
   const user = JSON.parse(localStorage.getItem('user'));
   const token = localStorage.getItem('myToken');
-  console.log(token);
+  //console.log(token);
   
 
   useEffect(() => {
