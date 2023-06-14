@@ -66,14 +66,18 @@ const StyledSelect = styled.select`
 `;
 
 const CourseList = ({ courses }) => {
-  // Retrieve user data from local storage
+  //Retrieve user data from local storage
   const user = JSON.parse(localStorage.getItem('user'));
+  //Retrieve the users token form local storage 
   const token = localStorage.getItem('myToken');
+
+  //These will hold the use state for the selected employee, enrolled courses etc...
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [employees, setEmployees] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [selectedEmployeeEnrolledCourses, setSelectedEmployeeEnrolledCourses] = useState([]);
 
+  //fetch all employees for the manager using bearer token to authorize request 
   const fetchEmployees = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/all/employees', {
@@ -88,6 +92,7 @@ const CourseList = ({ courses }) => {
     }
   };
 
+  //fetch all the courses an employee has enrolled on if any...
   const fetchEnrollments = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/employee/courses', {
@@ -99,8 +104,9 @@ const CourseList = ({ courses }) => {
     }
   };
 
+  // fetch the enrollments of a selected employee by a manager 
   const fetchEnrollmentsForSelectedEmployee = async () => {
-    if (!selectedEmployee) return; // Make sure we have a selected employee
+    if (!selectedEmployee) return; // Make sure there is a selected employee
 
     try {
       const response = await axios.get(`http://localhost:5000/api/employee/${selectedEmployee}/courses`, {
@@ -112,6 +118,8 @@ const CourseList = ({ courses }) => {
     }
   };
 
+  //use effect for different fecth requests which are unique to which ever type of employee is logged in.
+  //when ever the selected employee token or user role changes this triggers a re-render 
   useEffect(() => {
     if (user.role === 'manager') {
       fetchEmployees();
@@ -124,18 +132,23 @@ const CourseList = ({ courses }) => {
     }
   }, [selectedEmployee, token, user.role]);
 
+  //Called when an employee is selected in the managers drop down window 
   const handleChange = (e) => {
     setSelectedEmployee(e.target.value);
   };
 
+  //The function is called whenever the enroll button is clicked, passing the courseId parameter 
   const enrollCourse = async (courseId) => {
     try {
+      //find the course in the courses array by finding the matching courseId
       const course = courses.find(course => course._id === courseId);
+      //Call the put request using the matching courseId
       const response = await axios.put('http://localhost:5000/enroll', { courseId }, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
       if (response.data.success) {
+        //Add the course to the list of enrolled courses 
         setEnrolledCourses([...enrolledCourses, course]);
         alert('Successfully enrolled in course!');
       } else {
@@ -146,6 +159,7 @@ const CourseList = ({ courses }) => {
     }
   };
 
+  // When the unenroll button is clciked the user is unenrolled using the courseId
   const unenrollCourse = async (courseId) => {
     try {
       const response = await axios.put('http://localhost:5000/unenroll', { courseId }, {
@@ -163,9 +177,9 @@ const CourseList = ({ courses }) => {
     }
   };
 
+  //Enroll button unique to the manager allowing them to enroll an employee on a course by matching their employeeId
   const managerEnrollEmployee = async (employeeId, courseId) => {
     try {
-      const course = courses.find(course => course._id === courseId);
       const response = await axios.put('http://localhost:5000/manager/enroll', { employeeId, courseId }, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -181,6 +195,7 @@ const CourseList = ({ courses }) => {
     }
   };
 
+  //Unenroll button unique to the manager allowing them to unenroll an employee on a course by matching their employeeId
   const managerUnenrollEmployee = async (employeeId, courseId) => {
     try {
       const response = await axios.put('http://localhost:5000/manager/unenroll', { employeeId, courseId }, {
@@ -197,7 +212,10 @@ const CourseList = ({ courses }) => {
       console.error('Error unenrolling employee from course:', error);
     }
   };
-
+  
+  // The component's return statement. This is what will be rendered on the screen.
+  // In case of manager, an employee select option will be there.
+  // For each course, it will display the course details and show different buttons based on the user role and enrollment status.
   return (
     <div>
       {user.role === 'manager' && (
