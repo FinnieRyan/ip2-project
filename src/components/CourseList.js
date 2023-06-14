@@ -113,10 +113,16 @@ const CourseList = ({ courses }) => {
   };
 
   useEffect(() => {
-    fetchEmployees();
-    fetchEnrollments();
-    fetchEnrollmentsForSelectedEmployee();
-  }, [selectedEmployee, token]);
+    if (user.role === 'manager') {
+      fetchEmployees();
+    }
+    if (user.role === 'employee') {
+      fetchEnrollments();
+    }
+    if (user.role === 'manager'){
+      fetchEnrollmentsForSelectedEmployee();
+    }
+  }, [selectedEmployee, token, user.role]);
 
   const handleChange = (e) => {
     setSelectedEmployee(e.target.value);
