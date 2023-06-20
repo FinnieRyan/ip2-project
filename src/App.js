@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import EmployeeDashboard from './components/EmployeeDashboard';
-import ManagerDashboard from './components/ManagerDashboard';
+import EmployeeDashboard from './containers/EmployeeDashboard';
+import ManagerDashboard from './containers/ManagerDashboard';
 import LoginContainer from './containers/LoginContainer';
 import MainLayout from './components/MainLayout';
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import CourseList from './CourseList';
+import CourseList from '../components/CourseList';
 import styled, { keyframes } from 'styled-components';
 
 const slideInFromLeft = keyframes`

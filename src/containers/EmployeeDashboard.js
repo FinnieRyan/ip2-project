@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import CourseList from './CourseList';
+import CourseList from '../components/CourseList';
 import axios from 'axios';
 import styled, { keyframes } from 'styled-components';
 
