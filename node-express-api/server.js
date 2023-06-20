@@ -299,7 +299,7 @@ app.use(async (ctx, next) => {
   if (ctx.path === '/api/employee'){
     try {
       console.log('Inside /api/employee route');
-      // Retrieve the manager data from the database based on the authenticated user's managerId
+      // Retrieve the manager data from the database based on the authenticated user's employeeId
       const user = await User.findOne({ _id: ctx.state.user._id });
       console.log('User:', user); // Log the user object
 

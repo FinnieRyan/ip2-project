@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import ManagerDashboard from './components/ManagerDashboard';
 import LoginContainer from './containers/LoginContainer';
-//import NavBar from './components/Navbar';
 import MainLayout from './components/MainLayout';
 
 function App() {
