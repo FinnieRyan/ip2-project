@@ -229,19 +229,27 @@ const CourseList = ({ courses }) => {
         </StyledSelect>
       )}
 
-      {courses && courses.map((course, index) => {
+{courses && courses.map((course, index) => {
         return (
           <CourseBox key={index}>
             <CourseTitle>{course.name}</CourseTitle>
             <CourseDescription>{course.description}</CourseDescription>
             <CourseProvider>Provider: {course.provider}</CourseProvider>
-            {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
-              <EnrollButton disabled>Enrolled</EnrollButton>
-            ) : (
-              <EnrollButton onClick={() => enrollCourse(course._id)}>Enroll</EnrollButton>
+            
+            {/* Display Enroll and Unenroll buttons only if user is an employee */}
+            {user.role === 'employee' && (
+              <>
+                {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
+                  <EnrollButton disabled>Enrolled</EnrollButton>
+                ) : (
+                  <EnrollButton onClick={() => enrollCourse(course._id)}>Enroll</EnrollButton>
+                )}
+                <UnenrollButton onClick={() => unenrollCourse(course._id)}>Unenroll</UnenrollButton>
+              </>
             )}
-            <UnenrollButton onClick={() => unenrollCourse(course._id)}>Unenroll</UnenrollButton>
-            {selectedEmployee && (
+
+            {/* Display Manager Enroll and Unenroll buttons only if user is a manager and an employee is selected */}
+            {user.role === 'manager' && selectedEmployee && (
               <>
                 {selectedEmployeeEnrolledCourses.some(enrolledCourse => enrolledCourse === course._id) ? (
                   <EnrollButton disabled>Employee Enrolled</EnrollButton>

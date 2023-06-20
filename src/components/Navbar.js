@@ -37,7 +37,10 @@ const NavBar = () => {
   return (
     <NavBarContainer>
       {user.role === "employee" && 
+      <>
         <NavBarLink onClick={() => navigate('/employee-dashboard')}>Employee Dashboard</NavBarLink>
+        <NavBarLink onClick={() => navigate('/employee-training-history')}>Training History</NavBarLink>
+        </>
       }
       {user.role === "manager" && 
         <NavBarLink onClick={() => navigate('/manager-dashboard')}>Manager Dashboard</NavBarLink>
