@@ -17,6 +17,11 @@ const courseSchema = new mongoose.Schema({
     type: String,
     required: true,
   }],
+  completed: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee',
+    required: false,
+  }],  
 });
 
 

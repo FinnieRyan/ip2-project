@@ -147,6 +147,43 @@ router.put('/manager/unenroll', async ctx => {
   }
 })
 
+router.put('/complete', async ctx => {
+  try {
+    const user = await User.findOne({ _id: ctx.state.user._id });
+    const { courseId } = ctx.request.body;
+
+    // Get course and user/employee references
+    const course = await Course.findOne({ _id: courseId });
+    const employee = await Employee.findOne({ _id: user.employee_Id });
+
+    // Check if the course and the employee exist
+    if (!course || !employee) {
+      ctx.status = 404;
+      ctx.body = { error: 'Course or Employee not found' };
+      return;
+    }
+
+    // Check if the employee is not already enrolled or has already completed the course
+    if (!employee.courses.includes(course._id) || course.completed.includes(employee._id)) {
+      ctx.status = 400;
+      ctx.body = { error: 'Not enrolled in the course or Course already completed' };
+      return;
+    }
+
+    // Mark the course as completed by the employee
+    course.completed.push(employee._id);
+    await course.save();
+
+    ctx.status = 200;
+    ctx.body = { success: 'Successfully marked course as complete!' };
+  } catch (error) {
+    console.error('Error completing course:', error);
+    ctx.status = 500;
+    ctx.body = { error: 'Error completing course' };
+  }
+});
+
+
 router.get('/api/employee/courses', async (ctx) => {
   try {
     console.log('inside /api/employee/courses');

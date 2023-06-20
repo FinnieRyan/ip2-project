@@ -1,6 +1,6 @@
 const Router = require('koa-router');
 const axios = require('axios');
-const User = require('../models/user_model'); // Update the path to the userModel file
+const User = require('../models/user_model'); 
 const jwt = require('jsonwebtoken');
 const Manager = require('../models/manager_model');
 
@@ -25,6 +25,7 @@ const authenticate = async (ctx, next) => {
     // Verify the token
     const decoded = jwt.verify(token, 'secretKey');
     const userId = decoded.userId;
+    const employeeId = decoded.employeeId;
 
     // Find the user in the database
     const user = await User.findById(userId);
@@ -78,7 +79,7 @@ router.post('/login', async (ctx) => {
       console.log("managerId:", managerId);
 
     // Generate a JWT token
-    const tokenPayload = { userId: user._id };
+    const tokenPayload = { userId: user._id, employeeId: user.employee_Id };
     if (managerId) {
       tokenPayload.managerId = managerId;
     }

@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
+import jwtDecode from 'jwt-decode';
 
 const CourseBox = styled.div`
   border: 1px solid #b3d1ff;
@@ -64,18 +65,28 @@ const StyledSelect = styled.select`
   border: 1px solid #ddd;
   border-radius: 5px;
 `;
+const CompleteButton = styled(EnrollButton)`
+  background-color: #28a745;
 
-const CourseList = ({ courses }) => {
+  &:hover {
+    background-color: #218838;
+  }
+`;
+
+const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   //Retrieve user data from local storage
   const user = JSON.parse(localStorage.getItem('user'));
   //Retrieve the users token form local storage 
   const token = localStorage.getItem('myToken');
+  const decodedToken = jwtDecode(token);
+  const employeeId = decodedToken.employeeId;
 
   //These will hold the use state for the selected employee, enrolled courses etc...
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [employees, setEmployees] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [selectedEmployeeEnrolledCourses, setSelectedEmployeeEnrolledCourses] = useState([]);
+  
 
   //fetch all employees for the manager using bearer token to authorize request 
   const fetchEmployees = async () => {
@@ -130,7 +141,8 @@ const CourseList = ({ courses }) => {
     if (user.role === 'manager'){
       fetchEnrollmentsForSelectedEmployee();
     }
-  }, [selectedEmployee, token, user.role]);
+    
+  }, [selectedEmployee, token, user.role, courses]);
 
   //Called when an employee is selected in the managers drop down window 
   const handleChange = (e) => {
@@ -176,6 +188,41 @@ const CourseList = ({ courses }) => {
       console.error('Error unenrolling from course:', error);
     }
   };
+
+  const completeCourse = async (courseId) => {
+    try {
+      const course = courses.find(course => course._id === courseId);
+      console.log(course.completed); 
+      const response = await axios.put('http://localhost:5000/complete', { courseId }, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+  
+      if (response.data.success) {
+        const updatedCourse = response.data.course; 
+        const updatedCourses = courses.map((course) => (
+          course._id === updatedCourse._id ? updatedCourse : course
+        ));
+        
+        setCourses([...updatedCourses]);
+
+        // Also update the enrolledCourses state
+      const updatedEnrolledCourses = enrolledCourses.map((course) => (
+        course._id === updatedCourse._id ? {...updatedCourse} : {...course}
+      ));
+      setEnrolledCourses([...updatedEnrolledCourses]);
+  
+        // Update the courses state and then fetchEnrollments
+      setCourses(updatedCourses, fetchEnrollments);
+
+        alert('Successfully marked course as complete!');
+      } else {
+        alert(response.data.error);
+      }
+    } catch (error) {
+      console.error('Error completing course:', error);
+    }
+  };
+
 
   //Enroll button unique to the manager allowing them to enroll an employee on a course by matching their employeeId
   const managerEnrollEmployee = async (employeeId, courseId) => {
@@ -230,40 +277,54 @@ const CourseList = ({ courses }) => {
       )}
 
 {courses && courses.map((course, index) => {
-        return (
-          <CourseBox key={index}>
-            <CourseTitle>{course.name}</CourseTitle>
-            <CourseDescription>{course.description}</CourseDescription>
-            <CourseProvider>Provider: {course.provider}</CourseProvider>
-            
-            {/* Display Enroll and Unenroll buttons only if user is an employee */}
-            {user.role === 'employee' && (
-              <>
-                {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
-                  <EnrollButton disabled>Enrolled</EnrollButton>
-                ) : (
-                  <EnrollButton onClick={() => enrollCourse(course._id)}>Enroll</EnrollButton>
-                )}
-                <UnenrollButton onClick={() => unenrollCourse(course._id)}>Unenroll</UnenrollButton>
-              </>
-            )}
+   console.log('Course completed:', course.completed);
+   console.log('user:', user);
+   console.log('employee:', employeeId);
+   console.log('User ID:', employees._id);
+   console.log('Course ID:', course._id);
+      return (
+        <CourseBox key={index}>
+          <CourseTitle>{course.name}</CourseTitle>
+          <CourseDescription>{course.description}</CourseDescription>
+          <CourseProvider>Provider: {course.provider}</CourseProvider>
 
-            {/* Display Manager Enroll and Unenroll buttons only if user is a manager and an employee is selected */}
-            {user.role === 'manager' && selectedEmployee && (
-              <>
-                {selectedEmployeeEnrolledCourses.some(enrolledCourse => enrolledCourse === course._id) ? (
-                  <EnrollButton disabled>Employee Enrolled</EnrollButton>
-                ) : (
-                  <EnrollButton onClick={() => managerEnrollEmployee(selectedEmployee, course._id)}>Manager Enroll</EnrollButton>
-                )}
-                <UnenrollButton onClick={() => managerUnenrollEmployee(selectedEmployee, course._id)}>Manager Unenroll</UnenrollButton>
-              </>
-            )}
-          </CourseBox>
-        );
-      })}
-    </div>
-  );
+          {/* Display Enroll and Unenroll buttons only if user is an employee */}
+          {user.role === 'employee' && (
+    <>
+        {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
+            <EnrollButton disabled>Enrolled</EnrollButton>
+        ) : (
+            <EnrollButton onClick={() => enrollCourse(course._id)}>Enroll</EnrollButton>
+        )}
+        <UnenrollButton onClick={() => unenrollCourse(course._id)}>Unenroll</UnenrollButton>
+
+        {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
+            course.completed && course.completed.includes(employeeId) ? (
+                <CompleteButton disabled>Completed</CompleteButton>
+            ) : (
+                <CompleteButton onClick={() => completeCourse(course._id)}>Complete</CompleteButton>
+            )
+        ) : null}
+    </>
+)}
+      {/* Display Manager Enroll and Unenroll buttons only if user is a manager and an employee is selected */}
+          {user.role === 'manager' && selectedEmployee && (
+            <>
+              {selectedEmployeeEnrolledCourses.some(enrolledCourse => enrolledCourse === course._id) ? (
+                <EnrollButton disabled>Employee Enrolled</EnrollButton>
+              ) : (
+                <EnrollButton onClick={() => managerEnrollEmployee(selectedEmployee, course._id)}>Manager Enroll</EnrollButton>
+              )}
+              <UnenrollButton onClick={() => managerUnenrollEmployee(selectedEmployee, course._id)}>Manager Unenroll</UnenrollButton>
+            </>
+          )}
+        </CourseBox>
+      );
+    })}
+  </div>
+);
 };
 
 export default CourseList;
+
+

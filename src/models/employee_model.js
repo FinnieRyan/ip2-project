@@ -12,6 +12,10 @@ const employeeSchema = new mongoose.Schema({
   courses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'
+  }],
+  completedCourses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course'
   }]
 });
 
