@@ -8,6 +8,10 @@ const managerSchema = new mongoose.Schema({
   employees: [{
     type: String,
     ref: 'Employee'
+  }],
+  courses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course'
   }]
 });
 

@@ -104,7 +104,7 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   };
 
   //fetch all the courses an employee has enrolled on if any...
-  const fetchEnrollments = async () => {
+  const fetchEmployeeEnrollments = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/employee/courses', {
         headers: { Authorization: `Bearer ${token}` }
@@ -114,6 +114,19 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
       console.error('Error fetching enrolled courses:', error);
     }
   };
+
+  //fetch all the courses an employee has enrolled on if any...
+  const fetchManagerEnrollments = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/manager/courses', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setEnrolledCourses(response.data.courses);
+    } catch (error) {
+      console.error('Error fetching enrolled courses:', error);
+    }
+  };
+  
 
   // fetch the enrollments of a selected employee by a manager 
   const fetchEnrollmentsForSelectedEmployee = async () => {
@@ -136,10 +149,12 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
       fetchEmployees();
     }
     if (user.role === 'employee') {
-      fetchEnrollments();
+      fetchEmployeeEnrollments();
     }
     if (user.role === 'manager'){
       fetchEnrollmentsForSelectedEmployee();
+      fetchManagerEnrollments();
+      
     }
     
   }, [selectedEmployee, token, user.role, courses]);
@@ -212,7 +227,7 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
       setEnrolledCourses([...updatedEnrolledCourses]);
   
         // Update the courses state and then fetchEnrollments
-      setCourses(updatedCourses, fetchEnrollments);
+      setCourses(updatedCourses, fetchEmployeeEnrollments, fetchManagerEnrollments);
 
         alert('Successfully marked course as complete!');
       } else {
@@ -277,54 +292,52 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
       )}
 
 {courses && courses.map((course, index) => {
-   console.log('Course completed:', course.completed);
-   console.log('user:', user);
-   console.log('employee:', employeeId);
-   console.log('User ID:', employees._id);
-   console.log('Course ID:', course._id);
-      return (
-        <CourseBox key={index}>
-          <CourseTitle>{course.name}</CourseTitle>
-          <CourseDescription>{course.description}</CourseDescription>
-          <CourseProvider>Provider: {course.provider}</CourseProvider>
+  return (
+    <CourseBox key={index}>
+      <CourseTitle>{course.name}</CourseTitle>
+      <CourseDescription>{course.description}</CourseDescription>
+      <CourseProvider>Provider: {course.provider}</CourseProvider>
 
-          {/* Display Enroll and Unenroll buttons only if user is an employee */}
-          {user.role === 'employee' && (
-    <>
-        {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
+      {/* Display Enroll and Unenroll buttons only if user is an employee or if the user is a manager and no employee is selected */}
+      {(user.role === 'employee' || (user.role === 'manager' && !selectedEmployee)) ? (
+        <>
+          {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
             <EnrollButton disabled>Enrolled</EnrollButton>
-        ) : (
+          ) : (
             <EnrollButton onClick={() => enrollCourse(course._id)}>Enroll</EnrollButton>
-        )}
-        <UnenrollButton onClick={() => unenrollCourse(course._id)}>Unenroll</UnenrollButton>
-
-        {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
-            course.completed && course.completed.includes(employeeId) ? (
-                <CompleteButton disabled>Completed</CompleteButton>
-            ) : (
-                <CompleteButton onClick={() => completeCourse(course._id)}>Complete</CompleteButton>
-            )
-        ) : null}
-    </>
-)}
-      {/* Display Manager Enroll and Unenroll buttons only if user is a manager and an employee is selected */}
-          {user.role === 'manager' && selectedEmployee && (
-            <>
-              {selectedEmployeeEnrolledCourses.some(enrolledCourse => enrolledCourse === course._id) ? (
-                <EnrollButton disabled>Employee Enrolled</EnrollButton>
-              ) : (
-                <EnrollButton onClick={() => managerEnrollEmployee(selectedEmployee, course._id)}>Manager Enroll</EnrollButton>
-              )}
-              <UnenrollButton onClick={() => managerUnenrollEmployee(selectedEmployee, course._id)}>Manager Unenroll</UnenrollButton>
-            </>
           )}
-        </CourseBox>
-      );
-    })}
-  </div>
+          <UnenrollButton onClick={() => unenrollCourse(course._id)}>Unenroll</UnenrollButton>
+
+          {/* Display Complete button only if user is an employee or manager, no employee is selected, and the course is not yet completed */}
+          {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
+            course.completed && course.completed.includes(employeeId) ? (
+              <CompleteButton disabled>Completed</CompleteButton>
+            ) : (
+              <CompleteButton onClick={() => completeCourse(course._id)}>Complete</CompleteButton>
+            )
+          ) : null}
+        </>
+      ) : null}
+
+      {/* Display Manager Enroll and Unenroll buttons only if user is a manager and an employee is selected */}
+      {user.role === 'manager' && selectedEmployee && (
+        <>
+          {selectedEmployeeEnrolledCourses.some(enrolledCourse => enrolledCourse === course._id) ? (
+            <EnrollButton disabled>Employee Enrolled</EnrollButton>
+          ) : (
+            <EnrollButton onClick={() => managerEnrollEmployee(selectedEmployee, course._id)}>Manager Enroll</EnrollButton>
+          )}
+          <UnenrollButton onClick={() => managerUnenrollEmployee(selectedEmployee, course._id)}>Manager Unenroll</UnenrollButton>
+        </>
+      )}
+    </CourseBox>
+  );
+})}
+</div>
 );
 };
 
 export default CourseList;
+
 
 

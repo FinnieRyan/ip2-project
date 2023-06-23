@@ -26,7 +26,11 @@ router.put('/enroll',async ctx => {
     const {courseId} = ctx.request.body;
     const course = await Course.findOne({_id:courseId});
     const employee = await Employee.findOne({_id: user.employee_Id});
-
+    const manager = await Manager.findOne({_id: user.manager_Id})
+    
+    console.log("this is the courses:",course);
+    console.log("this is the manager:", manager);
+    console.log("this is the employee:", employee);
     // Check if course exists
     if(!course){
       ctx.status = 404;
@@ -35,15 +39,31 @@ router.put('/enroll',async ctx => {
     }
 
     // Check if the employee is already enrolled 
-    if(employee.courses.includes(course._id)) {
+    if(employee && employee.courses && employee.courses.includes(course._id)) {
       ctx.status = 404;
       ctx.body = { error: 'Already enrolled on course'};
       return;
     }
 
+    //check if the manager is already enrolled 
+    else if (manager && manager.courses && manager.courses.includes(course._id)) {
+      ctx.status = 404;
+      ctx.body = { error: 'Already enrolled on course' };
+      return;
+    }
+
     //enroll the employee to the course 
+    if(employee) {
     employee.courses.push(course._id);
     await employee.save()
+    }
+
+    //enroll the manager on the course 
+    if(manager) {
+      manager.courses.push(course._id);
+      await manager.save()
+    }
+
     ctx.status = 200; 
     ctx.body = {success: 'successfully enrolled in course'};
   } catch (error) {
@@ -89,6 +109,7 @@ router.put('/unenroll',async ctx => {
     ctx.body = {error: 'Error unenrolling from course'};
   }
 })
+
 router.put('/manager/enroll', async ctx => {
   try {
     const {employeeId, courseId} = ctx.request.body;
@@ -183,7 +204,7 @@ router.put('/complete', async ctx => {
   }
 });
 
-
+//find employee enrollent status 
 router.get('/api/employee/courses', async (ctx) => {
   try {
     console.log('inside /api/employee/courses');
@@ -237,6 +258,62 @@ router.get('/api/employee/courses', async (ctx) => {
     ctx.body = { error: 'Error fetching enrolled courses' };
   }
 });
+
+//find amanger enrollment status 
+router.get('/api/manager/courses', async (ctx) => {
+  try {
+    console.log('inside /api/manager/courses');
+
+    const authHeader = ctx.request.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      ctx.status = 401;
+      ctx.body = { error: 'Missing or invalid authorization header' };
+      return;
+    }
+
+    const token = authHeader.split(' ')[1];
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, 'secretKey');
+    } catch (error) {
+      ctx.status = 401;
+      ctx.body = { error: 'Invalid token' };
+      return;
+    }
+
+    const user = await User.findOne({_id: decodedToken.userId});
+    if (!user) {
+      ctx.status = 404;
+      ctx.body = { error: 'User not found' };
+      return;
+    }
+
+    const manager = await Manager.findOne({_id: user.manager_Id});
+
+    if (!manager) {
+      ctx.status = 404;
+      ctx.body = { error: 'Manager not found' };
+      return;
+    }
+
+    // Populate the courses field to retrieve the course details
+    const populatedManager = await Manager.findById(manager._id).populate('courses').exec();
+
+    if (!populatedManager) {
+      ctx.status = 500;
+      ctx.body = { error: 'Error populating courses for manager' };
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = { courses: populatedManager.courses };
+  } catch (error) {
+    console.error('Error fetching enrolled courses:', error);
+    ctx.status = 500;
+    ctx.body = { error: 'Error fetching enrolled courses' };
+  }
+});
+
 
 // GET /api/employee/:employeeId/courses route to retrieve enrolled courses for a given employee
 router.get('/api/employee/:employeeId/courses', async (ctx) => {
