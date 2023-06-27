@@ -80,6 +80,7 @@ router.put('/unenroll',async ctx => {
     const {courseId} = ctx.request.body;
     const course = await Course.findOne({_id:courseId});
     const employee = await Employee.findOne({_id: user.employee_Id});
+    const manager = await Manager.findOne({_id: user.manager_Id});
 
     // Check if course exists
     if(!course){
@@ -89,18 +90,36 @@ router.put('/unenroll',async ctx => {
     }
 
     // Check if the employee is not enrolled 
-    if(!employee.courses.includes(course._id)) {
+    if(employee && !employee.courses.includes(course._id)) {
       ctx.status = 404;
       ctx.body = { error: 'Employee not enrolled on this course'};
       return;
     }
 
+    // Check if the manager is enrolled 
+    if(manager && !manager.courses.includes(course._id)) {
+      ctx.status = 404;
+      ctx.body = {error: 'Manager not enrolled on this course'};
+      return;
+    }
+
     // Unenroll the employee from the course 
+    if(employee) {
     const index = employee.courses.indexOf(course._id);
     if (index > -1) {
       employee.courses.splice(index, 1);
-    }
     await employee.save()
+    }
+  }
+    //unenroll the manager from the course 
+    if(manager){
+      const index = manager.courses.indexOf(course._id);
+      if (index > -1) {
+        manager.courses.splice(index, 1);
+        await manager.save();
+      }
+    }
+
     ctx.status = 200; 
     ctx.body = {success: 'Successfully unenrolled from course'};
   } catch (error) {
@@ -173,30 +192,66 @@ router.put('/complete', async ctx => {
     const user = await User.findOne({ _id: ctx.state.user._id });
     const { courseId } = ctx.request.body;
 
-    // Get course and user/employee references
+    // Get course
     const course = await Course.findOne({ _id: courseId });
-    const employee = await Employee.findOne({ _id: user.employee_Id });
 
-    // Check if the course and the employee exist
-    if (!course || !employee) {
+    // Check if the course exists
+    if (!course) {
       ctx.status = 404;
-      ctx.body = { error: 'Course or Employee not found' };
+      ctx.body = { error: 'Course not found' };
       return;
     }
 
-    // Check if the employee is not already enrolled or has already completed the course
-    if (!employee.courses.includes(course._id) || course.completed.includes(employee._id)) {
+    // Check if user is an Employee or Manager, then perform appropriate operations
+    if (user.employee_Id) {
+      // Handle Employee
+      const employee = await Employee.findOne({ _id: user.employee_Id });
+
+      // Check if the employee exists
+      if (!employee) {
+        ctx.status = 404;
+        ctx.body = { error: 'Employee not found' };
+        return;
+      }
+
+      // Check if the employee is not already enrolled or has already completed the course
+      if (!employee.courses.includes(course._id) || course.completed.includes(employee._id)) {
+        ctx.status = 400;
+        ctx.body = { error: 'Not enrolled in the course or Course already completed' };
+        return;
+      }
+
+      // Mark the course as completed by the employee
+      course.completed.push(employee._id);
+    } else if (user.manager_Id) {
+      // Handle Manager
+      const manager = await Manager.findOne({ _id: user.manager_Id });
+
+      // Check if the manager exists
+      if (!manager) {
+        ctx.status = 404;
+        ctx.body = { error: 'Manager not found' };
+        return;
+      }
+
+      // Check if the manager is not already enrolled or has already completed the course
+      if (!manager.courses.includes(course._id) || course.completed.includes(manager._id)) {
+        ctx.status = 400;
+        ctx.body = { error: 'Not enrolled in the course or Course already completed by Manager' };
+        return;
+      }
+
+      // Mark the course as completed by the manager
+      course.completed.push(manager._id);
+    } else {
       ctx.status = 400;
-      ctx.body = { error: 'Not enrolled in the course or Course already completed' };
+      ctx.body = { error: 'User is neither an Employee nor a Manager' };
       return;
     }
 
-    // Mark the course as completed by the employee
-    course.completed.push(employee._id);
     await course.save();
-
     ctx.status = 200;
-    ctx.body = { success: 'Successfully marked course as complete!' };
+    ctx.body = { success: 'Successfully marked course as complete!', course: course};
   } catch (error) {
     console.error('Error completing course:', error);
     ctx.status = 500;
@@ -258,8 +313,7 @@ router.get('/api/employee/courses', async (ctx) => {
     ctx.body = { error: 'Error fetching enrolled courses' };
   }
 });
-
-//find amanger enrollment status 
+//find manger enrollment status 
 router.get('/api/manager/courses', async (ctx) => {
   try {
     console.log('inside /api/manager/courses');
@@ -313,13 +367,12 @@ router.get('/api/manager/courses', async (ctx) => {
     ctx.body = { error: 'Error fetching enrolled courses' };
   }
 });
-
-
 // GET /api/employee/:employeeId/courses route to retrieve enrolled courses for a given employee
 router.get('/api/employee/:employeeId/courses', async (ctx) => {
   try {
     console.log('inside api/employee/:employeeID/courses');
     const { employeeId } = ctx.params;
+    console.log(employeeId);
     const employee = await Employee.findOne({_id: employeeId});
     console.log('employee ID :', employeeId);
 
@@ -340,10 +393,6 @@ router.get('/api/employee/:employeeId/courses', async (ctx) => {
     ctx.body = { error: 'Error retrieving enrolled courses'};
   }
 });
-
-
-
-
 app.use(async (ctx, next) => {
   try {
     await next();

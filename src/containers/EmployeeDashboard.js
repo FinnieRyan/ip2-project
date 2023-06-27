@@ -130,7 +130,7 @@ const EmployeeDashboard = () => {
         <RoleText>Job role: {user.role}</RoleText>
         <DepartmentText>Department: {employeeInfo.department}</DepartmentText>
         <Text>Here are all the courses currently in the system:</Text>
-        {courses.length > 0 ? <CourseList courses={courses} setCourses={setCourses} onCoursesChange={onCoursesChange} /> : <p>Loading courses...</p>}
+        <CourseList courses={courses} setCourses={setCourses} onCoursesChange={onCoursesChange} /> 
       </DashboardContainer>
     </Background>
   );

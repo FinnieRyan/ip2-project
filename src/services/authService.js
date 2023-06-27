@@ -79,7 +79,7 @@ router.post('/login', async (ctx) => {
       console.log("managerId:", managerId);
 
     // Generate a JWT token
-    const tokenPayload = { userId: user._id, employeeId: user.employee_Id };
+    const tokenPayload = { userId: user._id, employeeId: user.employee_Id};
     if (managerId) {
       tokenPayload.managerId = managerId;
     }

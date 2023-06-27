@@ -125,7 +125,7 @@ const ManagerDashboard = () => {
       <RoleText>Job role: {user.role}</RoleText>
       <DepartmentText>Department: {managerInfo.department}</DepartmentText>
       <Text>Here are all the courses currently in the system:</Text>
-      <CourseList courses={courses} />
+      <CourseList courses={courses} setCourses={setCourses} />
     </DashboardContainer>
   </Background>
   );

@@ -80,16 +80,23 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   const token = localStorage.getItem('myToken');
   const decodedToken = jwtDecode(token);
   const employeeId = decodedToken.employeeId;
+  const managerId = decodedToken.managerId;
 
   //These will hold the use state for the selected employee, enrolled courses etc...
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [employees, setEmployees] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [selectedEmployeeEnrolledCourses, setSelectedEmployeeEnrolledCourses] = useState([]);
+  // Add loading state
+  const [loading, setLoading] = useState(false);
+  
+
+  
   
 
   //fetch all employees for the manager using bearer token to authorize request 
   const fetchEmployees = async () => {
+    setLoading(true); // Start loading
     try {
       const response = await axios.get('http://localhost:5000/api/all/employees', {
         headers: {
@@ -101,22 +108,28 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
     } catch (error) {
       console.error('Error fetching employees:', error);
     }
+    setLoading(false); // End loading
   };
 
   //fetch all the courses an employee has enrolled on if any...
   const fetchEmployeeEnrollments = async () => {
+    setLoading(true); // Start loading
+    console.log(employeeId)
     try {
-      const response = await axios.get('http://localhost:5000/api/employee/courses', {
+      const response = await axios.get(`http://localhost:5000/api/employee/courses`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('Enrolled courses response:', response.data); 
       setEnrolledCourses(response.data.courses);
     } catch (error) {
       console.error('Error fetching enrolled courses:', error);
     }
+    setLoading(false); // End loading
   };
 
   //fetch all the courses an employee has enrolled on if any...
   const fetchManagerEnrollments = async () => {
+    setLoading(true); // Start loading
     try {
       const response = await axios.get('http://localhost:5000/api/manager/courses', {
         headers: { Authorization: `Bearer ${token}` }
@@ -125,6 +138,7 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
     } catch (error) {
       console.error('Error fetching enrolled courses:', error);
     }
+    setLoading(false); // End loading
   };
   
 
@@ -156,7 +170,6 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
       fetchManagerEnrollments();
       
     }
-    
   }, [selectedEmployee, token, user.role, courses]);
 
   //Called when an employee is selected in the managers drop down window 
@@ -206,29 +219,25 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
 
   const completeCourse = async (courseId) => {
     try {
-      const course = courses.find(course => course._id === courseId);
-      console.log(course.completed); 
+      //const course = courses.find(course => course._id === courseId);
+      //console.log(course.completed); 
       const response = await axios.put('http://localhost:5000/complete', { courseId }, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
   
       if (response.data.success) {
         const updatedCourse = response.data.course; 
-        const updatedCourses = courses.map((course) => (
-          course._id === updatedCourse._id ? updatedCourse : course
-        ));
         
-        setCourses([...updatedCourses]);
-
-        // Also update the enrolledCourses state
-      const updatedEnrolledCourses = enrolledCourses.map((course) => (
-        course._id === updatedCourse._id ? {...updatedCourse} : {...course}
-      ));
-      setEnrolledCourses([...updatedEnrolledCourses]);
+        //update the course state 
+        setCourses(prevCourses => prevCourses.map(course => (
+          course._id === updatedCourse._id ? updatedCourse : course
+        )));
   
-        // Update the courses state and then fetchEnrollments
-      setCourses(updatedCourses, fetchEmployeeEnrollments, fetchManagerEnrollments);
-
+        // Also update the enrolledCourses state
+        setEnrolledCourses(prevEnrolledCourses => prevEnrolledCourses.map(course => (
+          course._id === updatedCourse._id ? updatedCourse : course
+        )));
+  
         alert('Successfully marked course as complete!');
       } else {
         alert(response.data.error);
@@ -280,60 +289,66 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   // For each course, it will display the course details and show different buttons based on the user role and enrollment status.
   return (
     <div>
-      {user.role === 'manager' && (
-        <StyledSelect value={selectedEmployee} onChange={handleChange}>
-          <option value="">Select an employee</option>
-          {employees && employees.map((employee) => (
-            <option key={employee._id} value={employee._id}>
-              {employee.firstname}
-            </option>
-          ))}
-        </StyledSelect>
-      )}
+    {loading ? (
+      <div>Loading...</div>
+    ) : (
+      <>
+        {user.role === 'manager' && (
+          <StyledSelect value={selectedEmployee} onChange={handleChange}>
+            <option value="">Select an employee</option>
+            {employees && employees.map((employee) => (
+              <option key={employee._id} value={employee._id}>
+                {employee.firstname}
+              </option>
+            ))}
+          </StyledSelect>
+        )}
 
-{courses && courses.map((course, index) => {
-  return (
-    <CourseBox key={index}>
-      <CourseTitle>{course.name}</CourseTitle>
-      <CourseDescription>{course.description}</CourseDescription>
-      <CourseProvider>Provider: {course.provider}</CourseProvider>
+        {courses && courses.map((course, index) => {
+          console.log(`Course id at index ${index}:`, course._id);
+          console.log(`Enrolled Courses `, enrolledCourses);
+          console.log(typeof course._id);
+          return (
+            <CourseBox key={index}>
+              <CourseTitle>{course.name}</CourseTitle>
+              <CourseDescription>{course.description}</CourseDescription>
+              <CourseProvider>Provider: {course.provider}</CourseProvider>
 
-      {/* Display Enroll and Unenroll buttons only if user is an employee or if the user is a manager and no employee is selected */}
-      {(user.role === 'employee' || (user.role === 'manager' && !selectedEmployee)) ? (
-        <>
-          {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
-            <EnrollButton disabled>Enrolled</EnrollButton>
-          ) : (
-            <EnrollButton onClick={() => enrollCourse(course._id)}>Enroll</EnrollButton>
-          )}
-          <UnenrollButton onClick={() => unenrollCourse(course._id)}>Unenroll</UnenrollButton>
+              {(user.role === 'employee' || (user.role === 'manager' && !selectedEmployee)) ? (
+                <>
+                  {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
+                    <EnrollButton disabled>Enrolled</EnrollButton>
+                  ) : (
+                    <EnrollButton onClick={() => enrollCourse(course._id)}>Enroll</EnrollButton>
+                  )}
+                  <UnenrollButton onClick={() => unenrollCourse(course._id)}>Unenroll</UnenrollButton>
 
-          {/* Display Complete button only if user is an employee or manager, no employee is selected, and the course is not yet completed */}
-          {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
-            course.completed && course.completed.includes(employeeId) ? (
-              <CompleteButton disabled>Completed</CompleteButton>
-            ) : (
-              <CompleteButton onClick={() => completeCourse(course._id)}>Complete</CompleteButton>
-            )
-          ) : null}
-        </>
-      ) : null}
+                  {enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id) ? (
+                    course.completed && (course.completed.includes(employeeId) || course.completed.includes(managerId)) ? (
+                      <CompleteButton disabled>Completed</CompleteButton>
+                    ) : (
+                      <CompleteButton onClick={() => completeCourse(course._id)}>Complete</CompleteButton>
+                    )
+                  ) : null}
+                </>
+              ) : null}
 
-      {/* Display Manager Enroll and Unenroll buttons only if user is a manager and an employee is selected */}
-      {user.role === 'manager' && selectedEmployee && (
-        <>
-          {selectedEmployeeEnrolledCourses.some(enrolledCourse => enrolledCourse === course._id) ? (
-            <EnrollButton disabled>Employee Enrolled</EnrollButton>
-          ) : (
-            <EnrollButton onClick={() => managerEnrollEmployee(selectedEmployee, course._id)}>Manager Enroll</EnrollButton>
-          )}
-          <UnenrollButton onClick={() => managerUnenrollEmployee(selectedEmployee, course._id)}>Manager Unenroll</UnenrollButton>
-        </>
-      )}
-    </CourseBox>
-  );
-})}
-</div>
+              {user.role === 'manager' && selectedEmployee && (
+                <>
+                  {selectedEmployeeEnrolledCourses.some(enrolledCourse => enrolledCourse === course._id) ? (
+                    <EnrollButton disabled>Employee Enrolled</EnrollButton>
+                  ) : (
+                    <EnrollButton onClick={() => managerEnrollEmployee(selectedEmployee, course._id)}>Manager Enroll</EnrollButton>
+                  )}
+                  <UnenrollButton onClick={() => managerUnenrollEmployee(selectedEmployee, course._id)}>Manager Unenroll</UnenrollButton>
+                </>
+              )}
+            </CourseBox>
+          );
+        })}
+      </>
+    )}
+  </div>
 );
 };
 
