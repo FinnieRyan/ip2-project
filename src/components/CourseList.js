@@ -72,6 +72,15 @@ const CompleteButton = styled(EnrollButton)`
     background-color: #218838;
   }
 `;
+const StyledMessage = styled.div`
+  color: ${props => props.type === 'error' ? 'red' : 'green'};
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: ${props => props.type === 'error' ? '#ffcccc' : '#ccffcc'};
+  transition: opacity 0.3s ease;
+  opacity: ${props => props.show ? '1' : '0'};
+`;
 
 const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   //Retrieve user data from local storage
@@ -89,6 +98,8 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   const [selectedEmployeeEnrolledCourses, setSelectedEmployeeEnrolledCourses] = useState([]);
   // Add loading state
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
   
 
   
@@ -190,9 +201,13 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
       if (response.data.success) {
         //Add the course to the list of enrolled courses 
         setEnrolledCourses([...enrolledCourses, course]);
-        alert('Successfully enrolled in course!');
+        setMessage('Successfully enrolled in course!');
+        setMessageType('success');
+        setTimeout(() => setMessage(''), 3000);
       } else {
-        alert(response.data.error);
+        setMessage(response.data.error);
+        setMessageType('error')
+        setTimeout(() => setMessage(''), 3000);
       }
     } catch (error) {
       console.error('Error enrolling in course:', error);
@@ -208,9 +223,13 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
 
       if (response.data.success) {
         setEnrolledCourses(enrolledCourses.filter(course => course._id !== courseId));
-        alert('Successfully unenrolled from course!');
+        setMessage('Successfully unenrolled from course!');
+        setMessageType('success');
+        setTimeout(() => setMessage(''), 3000);
       } else {
-        alert(response.data.error);
+        setMessage(response.data.error);
+        setMessageType('error')
+        setTimeout(() => setMessage(''), 3000);
       }
     } catch (error) {
       console.error('Error unenrolling from course:', error);
@@ -238,9 +257,13 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
           course._id === updatedCourse._id ? updatedCourse : course
         )));
   
-        alert('Successfully marked course as complete!');
+        setMessage('Successfully completed course!');
+        setMessageType('success');
+        setTimeout(() => setMessage(''), 3000);
       } else {
-        alert(response.data.error);
+        setMessage(response.data.error);
+        setMessageType('error')
+        setTimeout(() => setMessage(''), 3000);
       }
     } catch (error) {
       console.error('Error completing course:', error);
@@ -257,9 +280,13 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
 
       if (response.data.success) {
         fetchEnrollmentsForSelectedEmployee();
-        alert('Successfully enrolled employee in course!');
+        setMessage('Successfully enrolled in course!');
+        setMessageType('success');
+        setTimeout(() => setMessage(''), 3000);
       } else {
-        alert(response.data.error);
+        setMessage(response.data.error);
+        setMessageType('error')
+        setTimeout(() => setMessage(''), 3000);
       }
     } catch (error) {
       console.error('Error enrolling employee in course:', error);
@@ -275,9 +302,13 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
 
       if (response.data.success) {
         fetchEnrollmentsForSelectedEmployee();
-        alert('Successfully unenrolled employee from course!');
+        setMessage('Successfully unenrolled from course!');
+        setMessageType('success');
+        setTimeout(() => setMessage(''), 3000);
       } else {
-        alert(response.data.error);
+        setMessage(response.data.error);
+        setMessageType('error')
+        setTimeout(() => setMessage(''), 3000);
       }
     } catch (error) {
       console.error('Error unenrolling employee from course:', error);
@@ -289,7 +320,8 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   // For each course, it will display the course details and show different buttons based on the user role and enrollment status.
   return (
     <div>
-    {loading ? (
+      <StyledMessage type={messageType} show={message !== ''}>{message}</StyledMessage>
+      {loading ? (
       <div>Loading...</div>
     ) : (
       <>
