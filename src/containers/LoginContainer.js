@@ -34,10 +34,17 @@ const ContentWrapper = styled.div`
   flex-direction: column;
   align-items: center;
 `;
+const StyledError = styled.p`
+  color: red;
+  font-size: 1.2em;
+  margin: 10px 0;
+  animation: ${fadeIn} 2s ease-in;
+`;
 
 function LoginContainer() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -70,6 +77,11 @@ function LoginContainer() {
         navigate('/manager-dashboard'); // Navigate to the manager dashboard
       }
     } catch (err) {
+      if (err.response && err.response.status === 401) {
+        setErrorMessage('Invalid username or password');
+      } else {
+        setErrorMessage('Unexpected error. Please try again later')
+      }
       console.log('Login unsuccessful');
     }
   };
@@ -78,6 +90,7 @@ function LoginContainer() {
     <StyledLoginContainer>
       <ContentWrapper>
         <Title>Welcome to E-Train Training Portal!</Title>
+        {errorMessage && <StyledError>{errorMessage}</StyledError>}
         <LoginForm
           username={username}
           onUsernameChange={setUsername}
