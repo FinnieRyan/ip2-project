@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
+const slideInFromLeft = keyframes`
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+`;
 
 const CourseFormBox = styled.div`
   border: 1px solid #b3d1ff;
@@ -10,6 +21,8 @@ const CourseFormBox = styled.div`
   border-radius: 5px;
   background-color: #cce4ff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  opacity: 0;
+  animation: ${slideInFromLeft} 2s both;
 
   &:hover {
     transform: translateY(-5px);
@@ -52,6 +65,15 @@ const RemoveButton = styled(FormButton)`
   &:hover {
     background-color: #c82333;
   }
+`;
+const Select = styled.select`
+  margin-bottom: 10px;
+  width: 100%;
+  height: 35px;
+  padding: 5px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
 `;
 
 const AddRemoveCoursesForm = ({ courses }) => {
@@ -111,21 +133,20 @@ return (
       <FormField type="text" placeholder="Course Description" value={courseDescription} onChange={(e) => setCourseDescription(e.target.value)} />
       <FormField type="text" placeholder="Course Provider" value={courseProvider} onChange={(e) => setCourseProvider(e.target.value)} />
       
-      <FormTitle>Departments</FormTitle>
-    <select multiple={true} value={courseDepartments} onChange={handleAddDepartment}>
-      <option value="HR">HR</option>
-      <option value="Marketing">Marketing</option>
-      
-    </select>
+      <FormTitle>Department</FormTitle>
+      <Select value={courseDepartments} onChange={handleAddDepartment}>
+        <option value="HR">HR</option>
+        <option value="Marketing">Marketing</option>
+      </Select>
 
       <FormButton onClick={handleAddCourse}>Add Course</FormButton>
   
       <FormTitle>Remove Course</FormTitle>
-      <select id="removeCourseSelect">
+      <Select id="removeCourseSelect">
         {courses.map((course) => (
             <option key={course._id} value={course.name}>{course.name}</option>
         ))}
-      </select>
+      </Select>
       <RemoveButton onClick={() => {
         const courseName = document.getElementById('removeCourseSelect').value;
         handleRemoveCourse(courseName);

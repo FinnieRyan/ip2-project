@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import AddRemoveCoursesForm from '../components/AddRemovesCoursesform';
 import axios from 'axios';
+import styled, { keyframes } from 'styled-components';
+
+const slideInFromLeft = keyframes`
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+`;
+const Title = styled.h1`
+  animation: ${slideInFromLeft} 2s both;
+`;
 
 
 const AddRemoveCourses = () => {
@@ -30,7 +46,7 @@ const AddRemoveCourses = () => {
 
   return (
     <div>
-      <h1>Add or Remove Courses</h1>
+       <Title>Add or Remove Courses</Title>
       <AddRemoveCoursesForm courses={courses} />
     </div>
   );

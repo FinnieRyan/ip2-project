@@ -66,7 +66,7 @@ function LoginContainer() {
       localStorage.setItem('myToken', token);
       
       
-      console.log(user.role);
+      //console.log(user.role);
       if (user.role === 'employee') {
         //console.log('Employee login successful');
         localStorage.setItem('user', JSON.stringify(user)); // Store the user in local storage

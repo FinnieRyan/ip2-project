@@ -122,12 +122,12 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   //fetch all the courses an employee has enrolled on if any...
   const fetchEmployeeEnrollments = async () => {
     setLoading(true); // Start loading
-    console.log(employeeId)
+    //console.log(employeeId)
     try {
       const response = await axios.get(`http://localhost:5000/api/employee/courses`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('Enrolled courses response:', response.data); 
+      //console.log('Enrolled courses response:', response.data); 
       setEnrolledCourses(response.data.courses);
     } catch (error) {
       console.error('Error fetching enrolled courses:', error);
