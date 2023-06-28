@@ -393,6 +393,52 @@ router.get('/api/employee/:employeeId/courses', async (ctx) => {
     ctx.body = { error: 'Error retrieving enrolled courses'};
   }
 });
+
+// POST /api/courses endpoint to add a course
+router.post('/api/courses', async (ctx) => {
+  const { name, description, provider } = ctx.request.body;
+
+  try {
+    const course = new Course({
+      name,
+      description,
+      provider
+    });
+
+    await course.save();
+
+    ctx.status = 201;
+    ctx.body = course;
+  } catch (error) {
+    console.error('Error adding course:', error);
+    ctx.status = 500;
+    ctx.body = { error: 'Error adding course' };
+  }
+});
+
+// DELETE /api/courses/:name endpoint to delete a course
+router.delete('/api/courses/:name', async (ctx) => {
+  const { name } = ctx.params;
+
+  try {
+    const course = await Course.findOneAndDelete({name: name});
+
+    if (!course) {
+      ctx.status = 404;
+      ctx.body = { error: 'No course found with this name.' };
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = { message: 'Course successfully deleted.' };
+  } catch (error) {
+    console.error('Error removing course:', error);
+    ctx.status = 500;
+    ctx.body = { error: 'Error removing course' };
+  }
+});
+
+
 app.use(async (ctx, next) => {
   try {
     await next();
