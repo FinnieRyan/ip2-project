@@ -102,9 +102,6 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   const [messageType, setMessageType] = useState('');
   
 
-  
-  
-
   //fetch all employees for the manager using bearer token to authorize request 
   const fetchEmployees = async () => {
     setLoading(true); // Start loading
@@ -337,9 +334,9 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
         )}
 
         {courses && courses.map((course, index) => {
-          console.log(`Course id at index ${index}:`, course._id);
+          /*/console.log(`Course id at index ${index}:`, course._id);
           console.log(`Enrolled Courses `, enrolledCourses);
-          console.log(typeof course._id);
+          console.log(typeof course._id);*/
           return (
             <CourseBox key={index}>
               <CourseTitle>{course.name}</CourseTitle>

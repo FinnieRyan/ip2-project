@@ -43,7 +43,10 @@ const NavBar = () => {
         </>
       }
       {user.role === "manager" && 
+      <>
         <NavBarLink onClick={() => navigate('/manager-dashboard')}>Manager Dashboard</NavBarLink>
+        <NavBarLink onClick={() => navigate('/add-remove-courses')}>AddRemoveCourses</NavBarLink>
+        </>
       }
       <NavBarLink onClick={handleLogout}>Logout</NavBarLink>
     </NavBarContainer>
