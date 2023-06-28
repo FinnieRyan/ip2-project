@@ -396,13 +396,14 @@ router.get('/api/employee/:employeeId/courses', async (ctx) => {
 
 // POST /api/courses endpoint to add a course
 router.post('/api/courses', async (ctx) => {
-  const { name, description, provider } = ctx.request.body;
+  const { name, description, provider, departments } = ctx.request.body;
 
   try {
     const course = new Course({
       name,
       description,
-      provider
+      provider,
+      departments
     });
 
     await course.save();

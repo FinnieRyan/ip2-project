@@ -58,7 +58,7 @@ const AddRemoveCoursesForm = ({ courses }) => {
   const [courseName, setCourseName] = useState('');
   const [courseDescription, setCourseDescription] = useState('');
   const [courseProvider, setCourseProvider] = useState('');
-  const [courseDepartment, setCourseDepartment] = useState('');
+  const [courseDepartments, setCourseDepartments] = useState([]);
   //Retrieve user data from local storage
   const user = JSON.parse(localStorage.getItem('user'));
   //Retrieve the users token form local storage 
@@ -70,7 +70,7 @@ const AddRemoveCoursesForm = ({ courses }) => {
       name: courseName,
       description: courseDescription,
       provider: courseProvider,
-      department: courseDepartment,
+      departments: courseDepartments,
     };
 
     try {
@@ -82,6 +82,10 @@ const AddRemoveCoursesForm = ({ courses }) => {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleAddDepartment = (event) => {
+    setCourseDepartments(Array.from(event.target.selectedOptions, option => option.value));
   };
 
   const handleRemoveCourse = async (courseName) => {
@@ -106,7 +110,14 @@ return (
       <FormField type="text" placeholder="Course Name" value={courseName} onChange={(e) => setCourseName(e.target.value)} />
       <FormField type="text" placeholder="Course Description" value={courseDescription} onChange={(e) => setCourseDescription(e.target.value)} />
       <FormField type="text" placeholder="Course Provider" value={courseProvider} onChange={(e) => setCourseProvider(e.target.value)} />
-      <FormField type="text" placeholder="Course Department" value={courseDepartment} onChange={(e) => setCourseDepartment(e.target.value)} />
+      
+      <FormTitle>Departments</FormTitle>
+    <select multiple={true} value={courseDepartments} onChange={handleAddDepartment}>
+      <option value="HR">HR</option>
+      <option value="Marketing">Marketing</option>
+      
+    </select>
+
       <FormButton onClick={handleAddCourse}>Add Course</FormButton>
   
       <FormTitle>Remove Course</FormTitle>
