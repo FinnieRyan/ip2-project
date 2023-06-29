@@ -14,9 +14,11 @@ const slideInFromLeft = keyframes`
     opacity: 1;
   }
 `;
-const Title = styled.h1`
-  animation: ${slideInFromLeft} 2s both;
+const Background = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
 `;
+
 
 
 const AddRemoveCourses = () => {
@@ -45,10 +47,9 @@ const AddRemoveCourses = () => {
   }, []);
 
   return (
-    <div>
-       <Title>Add or Remove Courses</Title>
+    <Background>
       <AddRemoveCoursesForm courses={courses} />
-    </div>
+    </Background>
   );
 };
 

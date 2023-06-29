@@ -60,6 +60,10 @@ const CourseDescription = styled.p`
   color: #666;
   font-size: 1.2em;
 `;
+const Background = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+`;
 
 const TrainingHistory = () => {
   const [trainingHistory, setTrainingHistory] = useState([]);
@@ -92,6 +96,7 @@ const TrainingHistory = () => {
   }, [token, user.role, user.employeeId]);
 
   return (
+    <Background>
     <DashboardContainer>
       {loading ? <CourseDescription>Loading...</CourseDescription> :
         trainingHistory.map((record, index) => (
@@ -106,6 +111,7 @@ const TrainingHistory = () => {
         ))
       }
     </DashboardContainer>
+    </Background>
   );
 };
 

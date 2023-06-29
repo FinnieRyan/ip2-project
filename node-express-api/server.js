@@ -445,8 +445,6 @@ router.get('/api/employee/:employeeId/courseRecords', async ctx => {
   try {
     const { employeeId } = ctx.params;
     const employee = await Employee.findOne({_id: employeeId});
-    console.log(employee);
-    console.log(employeeId);
     // Check if employee exists
     if (!employee) {
       ctx.status = 404;
@@ -459,11 +457,7 @@ router.get('/api/employee/:employeeId/courseRecords', async ctx => {
 
     // Construct training history
     const trainingHistory = courses.map(course => {
-      // Log course completed array and employeeId
-      console.log('course.completed:', course.completed);
-      console.log('employeeId:', employeeId);
-
-      const status = course.completed && course.completed.includes(employeeId) ? 'completed' : 'started';
+      const status = course.completed && course.completed.includes(employeeId) ? 'completed' : 'In-progress';
       return {
         course: {
           name: course.name,
