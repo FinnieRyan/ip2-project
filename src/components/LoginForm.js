@@ -22,7 +22,7 @@ const Form = styled.form`
   border-radius: 10px; 
   background-color: #e0f0ff;
   box-shadow: 0px 0px 16px 4px rgba(0,0,0,0.1); 
-  animation: ${fadeIn} 2s ease-in;
+  animation: ${fadeIn} 0.5s ease-in;
 `;
 
 const Input = styled.input`

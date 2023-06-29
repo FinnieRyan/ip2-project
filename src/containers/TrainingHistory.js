@@ -25,7 +25,7 @@ const DashboardContainer = styled.div`
   border-radius: 10px;
   box-shadow: 0px 0px 20px rgba(0,0,0,0.1);
   opacity: 0;
-  animation: ${slideInFromLeft} 2s both;
+  animation: ${slideInFromLeft} 0.5s both;
   background-color: #e0f0ff;
 `;
 

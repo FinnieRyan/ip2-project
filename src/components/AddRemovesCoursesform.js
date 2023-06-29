@@ -22,7 +22,7 @@ const CourseFormBox = styled.div`
   background-color: #cce4ff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   opacity: 0;
-  animation: ${slideInFromLeft} 2s both;
+  animation: ${slideInFromLeft} 0.5s both;
 
   &:hover {
     transform: translateY(-5px);

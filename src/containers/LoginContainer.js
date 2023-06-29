@@ -26,7 +26,7 @@ const Title = styled.h1`
   color: #fff;
   font-size: 2em;
   text-align: center;
-  animation: ${fadeIn} 2s ease-in;
+  animation: ${fadeIn} 0.5s ease-in;
   margin-bottom: 20px;
 `;
 const ContentWrapper = styled.div`
