@@ -85,7 +85,7 @@ const StyledMessage = styled.div`
   opacity: ${props => props.show ? '1' : '0'};
 `;
 
-const AddRemoveCoursesForm = ({ courses }) => {
+const AddRemoveCoursesForm = ({ courses, fetchCourses }) => {
   const [courseName, setCourseName] = useState('');
   const [courseDescription, setCourseDescription] = useState('');
   const [courseProvider, setCourseProvider] = useState('');
@@ -112,15 +112,17 @@ const AddRemoveCoursesForm = ({ courses }) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    if (response.data.status === 201) {
-        console.log(response.data); 
+    //console.log(response);
+    if (response.status === 201) {
+        //console.log(response.data); 
         setMessage('Successfully added course!');
-        console.log(message);
+        //console.log(message);
         setMessageType('success');
         setTimeout(() => setMessage(''), 3000);
+        fetchCourses();
       } else {
         setMessage(response.data.error);
-        console.log(message);
+        //console.log(message);
         setMessageType('error')
         setTimeout(() => setMessage(''), 3000);
       }
@@ -142,12 +144,13 @@ const AddRemoveCoursesForm = ({ courses }) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    if (response.data.status === 200) {
-        console.log(response.data); 
+    if (response.status === 200) {
+        //console.log(response.data); 
         setMessage('Successfully Removed course!');
-        console.log(message);
+        //console.log(message);
         setMessageType('success');
         setTimeout(() => setMessage(''), 3000);
+        fetchCourses();
       } else {
         setMessage(response.data.error);
         console.log(message);

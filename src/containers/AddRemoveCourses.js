@@ -29,26 +29,27 @@ const AddRemoveCourses = () => {
   const token = localStorage.getItem('myToken');
   
 
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/course' , {
-        headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setCourses(response.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/course' , {
+      headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      //console.log(response.data);
+      setCourses(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
+  useEffect(() => {
     fetchCourses();
   }, []);
 
   return (
     <Background>
-      <AddRemoveCoursesForm courses={courses} />
+      <AddRemoveCoursesForm courses={courses} fetchCourses={fetchCourses} />
     </Background>
   );
 };
