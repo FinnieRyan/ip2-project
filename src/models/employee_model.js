@@ -13,9 +13,9 @@ const employeeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'
   }],
-  completedCourses: [{
+  courseRecords: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course'
+    ref: 'CourseRecord'
   }]
 });
 

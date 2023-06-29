@@ -75,12 +75,23 @@ const Select = styled.select`
   border: 1px solid #ddd;
   border-radius: 5px;
 `;
+const StyledMessage = styled.div`
+  color: ${props => props.type === 'error' ? 'red' : 'green'};
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: ${props => props.type === 'error' ? '#ffcccc' : '#ccffcc'};
+  transition: opacity 0.3s ease;
+  opacity: ${props => props.show ? '1' : '0'};
+`;
 
 const AddRemoveCoursesForm = ({ courses }) => {
   const [courseName, setCourseName] = useState('');
   const [courseDescription, setCourseDescription] = useState('');
   const [courseProvider, setCourseProvider] = useState('');
   const [courseDepartments, setCourseDepartments] = useState([]);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
   //Retrieve user data from local storage
   const user = JSON.parse(localStorage.getItem('user'));
   //Retrieve the users token form local storage 
@@ -101,6 +112,18 @@ const AddRemoveCoursesForm = ({ courses }) => {
         Authorization: `Bearer ${token}`,
       },
     });
+    if (response.data.status === 201) {
+        console.log(response.data); 
+        setMessage('Successfully added course!');
+        console.log(message);
+        setMessageType('success');
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        setMessage(response.data.error);
+        console.log(message);
+        setMessageType('error')
+        setTimeout(() => setMessage(''), 3000);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -119,7 +142,18 @@ const AddRemoveCoursesForm = ({ courses }) => {
         Authorization: `Bearer ${token}`,
       },
     });
-      // You may need to refresh the list of courses here.
+    if (response.data.status === 200) {
+        console.log(response.data); 
+        setMessage('Successfully Removed course!');
+        console.log(message);
+        setMessageType('success');
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        setMessage(response.data.error);
+        console.log(message);
+        setMessageType('error')
+        setTimeout(() => setMessage(''), 3000);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -128,6 +162,7 @@ const AddRemoveCoursesForm = ({ courses }) => {
 
 return (
     <CourseFormBox>
+    <StyledMessage type={messageType} show={message !== ''}>{message}</StyledMessage>
       <FormTitle>Add Course</FormTitle>
       <FormField type="text" placeholder="Course Name" value={courseName} onChange={(e) => setCourseName(e.target.value)} />
       <FormField type="text" placeholder="Course Description" value={courseDescription} onChange={(e) => setCourseDescription(e.target.value)} />

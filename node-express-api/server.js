@@ -8,6 +8,7 @@ const User = require('../src/models/user_model'); // Import the User model
 const Course = require('../src/models/course_model'); // Import the Course model
 const Manager = require('../src/models/manager_model'); // Import the manager model
 const Employee = require('../src/models/employee_model');// Import Employee model 
+const CourseRecord = require('../src/models/course_record_model')//Import courserecord model 
 const jwt = require('jsonwebtoken') //Import token 
 
 
@@ -438,6 +439,52 @@ router.delete('/api/courses/:name', async (ctx) => {
     ctx.body = { error: 'Error removing course' };
   }
 });
+
+// Fetch training history
+router.get('/api/employee/:employeeId/courseRecords', async ctx => {
+  try {
+    const { employeeId } = ctx.params;
+    const employee = await Employee.findOne({_id: employeeId});
+    console.log(employee);
+    console.log(employeeId);
+    // Check if employee exists
+    if (!employee) {
+      ctx.status = 404;
+      ctx.body = { error: 'Employee not found' };
+      return;
+    }
+
+    // Fetch all the courses the employee has enrolled in
+    const courses = await Course.find({_id: { $in: employee.courses }}).select('name provider description completed');
+
+    // Construct training history
+    const trainingHistory = courses.map(course => {
+      // Log course completed array and employeeId
+      console.log('course.completed:', course.completed);
+      console.log('employeeId:', employeeId);
+
+      const status = course.completed && course.completed.includes(employeeId) ? 'completed' : 'started';
+      return {
+        course: {
+          name: course.name,
+          provider: course.provider,
+          description: course.description,
+        },
+        employee: employeeId,
+        status: status
+      };
+    });
+
+    ctx.status = 200;
+    ctx.body = trainingHistory;
+  } catch (error) {
+    console.error('Error fetching training history:', error);
+    ctx.status = 500;
+    ctx.body = { error: 'Internal Server Error' };
+  }
+});
+
+
 
 
 app.use(async (ctx, next) => {
