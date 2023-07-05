@@ -10,6 +10,7 @@ const Manager = require('../src/models/manager_model'); // Import the manager mo
 const Employee = require('../src/models/employee_model');// Import Employee model 
 const CourseRecord = require('../src/models/course_record_model')//Import courserecord model 
 const jwt = require('jsonwebtoken') //Import token 
+const { swagger, swaggerSpec } = require('./swagger');
 
 
 
@@ -20,7 +21,33 @@ const port = 5000;
 app.use(cors());
 app.use(bodyParser());
 
-//new /enroll route
+/**
+ * @swagger
+ * /enroll:
+ *   put:
+ *     summary: Enroll a user in a course
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - courseId
+ *             properties:
+ *               courseId:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Successfully enrolled in course
+ *       '404':
+ *         description: Course not found or user already enrolled on course
+ *       '500':
+ *         description: Error enrolling in course
+ */
 router.put('/enroll',async ctx => {
   try{
     const user = await User.findOne({_id: ctx.state.user._id});
@@ -74,7 +101,33 @@ router.put('/enroll',async ctx => {
   }
 })
 
-// new /unenroll route
+/**
+ * @swagger
+ * /unenroll:
+ *   put:
+ *     summary: Unenroll a user from a course
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - courseId
+ *             properties:
+ *               courseId:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Successfully unenrolled from course
+ *       '404':
+ *         description: Course not found or user not enrolled on this course
+ *       '500':
+ *         description: Error unenrolling from course
+ */
 router.put('/unenroll',async ctx => {
   try{
     const user = await User.findOne({_id: ctx.state.user._id});
@@ -130,6 +183,36 @@ router.put('/unenroll',async ctx => {
   }
 })
 
+/**
+ * @swagger
+ * /manager/enroll:
+ *   put:
+ *     summary: Enroll an employee in a course
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - employeeId
+ *               - courseId
+ *             properties:
+ *               employeeId:
+ *                 type: string
+ *               courseId:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Successfully enrolled employee in course
+ *       '404':
+ *         description: Course not found or employee already enrolled on course
+ *       '500':
+ *         description: Error enrolling employee in course
+ */
 router.put('/manager/enroll', async ctx => {
   try {
     const {employeeId, courseId} = ctx.request.body;
@@ -159,6 +242,36 @@ router.put('/manager/enroll', async ctx => {
   }
 })
 
+/**
+ * @swagger
+ * /manager/unenroll:
+ *   put:
+ *     summary: Unenroll an employee from a course
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - employeeId
+ *               - courseId
+ *             properties:
+ *               employeeId:
+ *                 type: string
+ *               courseId:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Successfully unenrolled employee from course
+ *       '404':
+ *         description: Course not found or employee not enrolled on this course
+ *       '500':
+ *         description: Error unenrolling employee from course
+ */
 router.put('/manager/unenroll', async ctx => {
   try {
     const {employeeId, courseId} = ctx.request.body;
@@ -188,6 +301,35 @@ router.put('/manager/unenroll', async ctx => {
   }
 })
 
+/**
+ * @swagger
+ * /complete:
+ *   put:
+ *     summary: Mark a course as complete for a user
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - courseId
+ *             properties:
+ *               courseId:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Successfully marked course as complete
+ *       '400':
+ *         description: Not enrolled in the course, course already completed, or user is neither an employee nor a manager
+ *       '404':
+ *         description: Course, employee or manager not found
+ *       '500':
+ *         description: Error completing course
+ */
 router.put('/complete', async ctx => {
   try {
     const user = await User.findOne({ _id: ctx.state.user._id });
@@ -260,7 +402,24 @@ router.put('/complete', async ctx => {
   }
 });
 
-//find employee enrollent status 
+/**
+ * @swagger
+ * /api/employee/courses:
+ *   get:
+ *     summary: Get all courses that the authenticated employee is enrolled in
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved courses
+ *       '401':
+ *         description: Missing or invalid authorization header or Invalid token
+ *       '404':
+ *         description: User or Employee not found
+ *       '500':
+ *         description: Error fetching enrolled courses or Error populating courses for employee
+ */
 router.get('/api/employee/courses', async (ctx) => {
   try {
     console.log('inside /api/employee/courses');
@@ -314,7 +473,25 @@ router.get('/api/employee/courses', async (ctx) => {
     ctx.body = { error: 'Error fetching enrolled courses' };
   }
 });
-//find manger enrollment status 
+
+/**
+ * @swagger
+ * /api/manager/courses:
+ *   get:
+ *     summary: Get all courses that the authenticated manager is enrolled in
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved courses
+ *       '401':
+ *         description: Missing or invalid authorization header or Invalid token
+ *       '404':
+ *         description: User or Manager not found
+ *       '500':
+ *         description: Error fetching enrolled courses or Error populating courses for manager
+ */
 router.get('/api/manager/courses', async (ctx) => {
   try {
     console.log('inside /api/manager/courses');
@@ -368,7 +545,28 @@ router.get('/api/manager/courses', async (ctx) => {
     ctx.body = { error: 'Error fetching enrolled courses' };
   }
 });
-// GET /api/employee/:employeeId/courses route to retrieve enrolled courses for a given employee
+
+/**
+ * @swagger
+ * /api/employee/{employeeId}/courses:
+ *   get:
+ *     summary: Get all courses that the specified employee is enrolled in
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: employeeId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Employee ID
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved courses
+ *       '404':
+ *         description: Employee not found
+ *       '500':
+ *         description: Error retrieving enrolled courses
+ */
 router.get('/api/employee/:employeeId/courses', async (ctx) => {
   try {
     console.log('inside api/employee/:employeeID/courses');
@@ -395,7 +593,41 @@ router.get('/api/employee/:employeeId/courses', async (ctx) => {
   }
 });
 
-// POST /api/courses endpoint to add a course
+/**
+ * @swagger
+ * /api/courses:
+ *   post:
+ *     summary: Add a new course
+ *     tags: [Courses]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - description
+ *               - provider
+ *               - departments
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               provider:
+ *                 type: string
+ *               departments:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       '201':
+ *         description: Successfully added course
+ *       '500':
+ *         description: Error adding course
+ */
+
 router.post('/api/courses', async (ctx) => {
   const { name, description, provider, departments } = ctx.request.body;
 
@@ -418,7 +650,27 @@ router.post('/api/courses', async (ctx) => {
   }
 });
 
-// DELETE /api/courses/:name endpoint to delete a course
+/**
+ * @swagger
+ * /api/courses/{name}:
+ *   delete:
+ *     summary: Delete a course by name
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: name
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Course name
+ *     responses:
+ *       '200':
+ *         description: Successfully deleted course
+ *       '404':
+ *         description: No course found with this name
+ *       '500':
+ *         description: Error removing course
+ */
 router.delete('/api/courses/:name', async (ctx) => {
   const { name } = ctx.params;
 
@@ -440,7 +692,27 @@ router.delete('/api/courses/:name', async (ctx) => {
   }
 });
 
-// Fetch training history
+/**
+ * @swagger
+ * /api/employee/{employeeId}/courseRecords:
+ *   get:
+ *     summary: Get training history for specified employee
+ *     tags: [Training]
+ *     parameters:
+ *       - in: path
+ *         name: employeeId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Employee ID
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved training history
+ *       '404':
+ *         description: Employee not found
+ *       '500':
+ *         description: Error fetching training history
+ */
 router.get('/api/employee/:employeeId/courseRecords', async ctx => {
   try {
     const { employeeId } = ctx.params;
@@ -496,7 +768,18 @@ app.use(authService.router.routes());
 app.use(authService.authenticate);
 app.use(router.routes());
 
-// GET /api/user route to retrieve user data
+/**
+ * @swagger
+ * /api/user:
+ *   get:
+ *     summary: Retrieve all user data
+ *     tags: [Users]
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved user data
+ *       '500':
+ *         description: Error retrieving user data
+ */
 app.use(async (ctx, next) => {
   if (ctx.path === '/api/user') {
     console.log('Inside /api/user route');
@@ -516,7 +799,20 @@ app.use(async (ctx, next) => {
   }
 });
 
-// GET /api/manager route to retrieve manager data
+/**
+ * @swagger
+ * /api/manager:
+ *   get:
+ *     summary: Retrieve manager data for authenticated user
+ *     tags: [Managers]
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved manager data
+ *       '404':
+ *         description: Manager data not found
+ *       '500':
+ *         description: Error retrieving manager data
+ */
 app.use(async (ctx, next) => {
   if (ctx.path === '/api/manager') {
     try {
@@ -546,6 +842,20 @@ app.use(async (ctx, next) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/employee:
+ *   get:
+ *     summary: Retrieve employee data for authenticated user
+ *     tags: [Employees]
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved employee data
+ *       '404':
+ *         description: Employee not found
+ *       '500':
+ *         description: Error retrieving employee data
+ */
 app.use(async (ctx, next) => {
   if (ctx.path === '/api/employee'){
     try {
@@ -573,7 +883,22 @@ app.use(async (ctx, next) => {
   }
 });
 
-
+/**
+ * @swagger
+ * /api/all/employees:
+ *   get:
+ *     summary: Retrieve all employees for authenticated manager
+ *     tags: [Employees]
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved employees data
+ *       '404':
+ *         description: No employees found
+ *       '401':
+ *         description: Missing or invalid authorization header or Invalid token
+ *       '500':
+ *         description: Error retrieving employees data
+ */
 app.use(async (ctx, next) => {
   if (ctx.path === '/api/all/employees') {
     try {
@@ -625,7 +950,18 @@ app.use(async (ctx, next) => {
   }
 });
 
-
+/**
+ * @swagger
+ * /api/course:
+ *   get:
+ *     summary: Retrieve all courses for specific departments or all courses if no department is specified
+ *     tags: [Courses]
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved courses
+ *       '500':
+ *         description: Error retrieving courses
+ */
 app.use(async (ctx, next) => {
   if (ctx.path === '/api/course') {
     try {
@@ -652,12 +988,28 @@ app.use(async (ctx, next) => {
   }
 });
 
-
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Default route to test the server
+ *     tags: [Test]
+ *     responses:
+ *       '200':
+ *         description: Server running successfully
+ */
 app.use(async (ctx) => {
   if (ctx.path === '/') {
     ctx.body = 'Hello World!';
     console.log("hello")
   } 
+});
+
+app.use(swagger);
+
+router.get('/swagger.json', async (ctx) => {
+  ctx.set('Content-Type', 'application/json');
+  ctx.body = swaggerSpec;
 });
 
 // Connect to MongoDB

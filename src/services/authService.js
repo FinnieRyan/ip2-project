@@ -11,6 +11,11 @@ const router = new Router();
 const authenticate = async (ctx, next) => {
   console.log('Inside authenticate middleware');
 
+  // Check if the request is for Swagger documentation
+  if (ctx.path === '/swagger' || ctx.path === '/swagger.json') {
+    return next(); // Skip the rest of the middleware
+  }
+
   // Get the token from the request headers
   const authHeader = ctx.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
