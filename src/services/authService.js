@@ -7,7 +7,9 @@ const Manager = require('../models/manager_model');
 
 const router = new Router();
 
-// Middleware to authenticate the user
+
+
+
 const authenticate = async (ctx, next) => {
   console.log('Inside authenticate middleware');
 
@@ -52,7 +54,61 @@ const authenticate = async (ctx, next) => {
   }
 };
 
-// POST /login
+
+/**
+ * @swagger
+ * paths:
+ *   /login:
+ *     post:
+ *       summary: Login a user and return JWT
+ *       tags: [Authentication]
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - username
+ *                 - password
+ *               properties:
+ *                 username:
+ *                   type: string
+ *                   description: The user's name
+ *                 password:
+ *                   type: string
+ *                   description: The user's password
+ *               example:
+ *                 username: user1
+ *                 password: password123
+ *       responses:
+ *         200:
+ *           description: Login successful
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *                     description: Success message
+ *                   user:
+ *                     type: object
+ *                     properties:
+ *                       username:
+ *                         type: string
+ *                       role:
+ *                         type: string
+ *               example:
+ *                 message: "Login successful"
+ *                 user: 
+ *                   username: "user1"
+ *                   role: "manager"
+ *         401:
+ *           description: Invalid username or password
+ *         500:
+ *           description: An error occurred during authentication
+ */
 router.post('/login', async (ctx) => {
   const { username, password } = ctx.request.body;
   //console.log('Inside /login route');

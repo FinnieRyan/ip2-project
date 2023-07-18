@@ -97,22 +97,26 @@ const TrainingHistory = () => {
 
   return (
     <Background>
-    <DashboardContainer>
-      {loading ? <CourseDescription>Loading...</CourseDescription> :
-        trainingHistory.map((record, index) => (
-          <CourseBox key={index}>
-            <CourseTitle>{record.course.name}</CourseTitle>
-            <CourseProvider>Provider: {record.course.provider}</CourseProvider>
-            <CourseDescription>Description: {record.course.description}</CourseDescription>
-            <CourseDescription>Status: {record.status}</CourseDescription>
-            <CourseDescription>Start date: {new Date(record.startDate).toLocaleDateString()}</CourseDescription>
-            {record.endDate && <CourseDescription>End date: {new Date(record.endDate).toLocaleDateString()}</CourseDescription>}
-          </CourseBox>
-        ))
-      }
-    </DashboardContainer>
+      <DashboardContainer>
+        {loading ? <CourseDescription>Loading...</CourseDescription> :
+          trainingHistory.map((record, index) => (
+            <CourseBox key={index}>
+              <CourseTitle>
+                {record.course ? record.course.name : "Course Deleted"} 
+                {record.course && record.course.isDeleted ? " (Deleted)" : ""}
+              </CourseTitle>
+              {record.course && <CourseProvider>Provider: {record.course.provider}</CourseProvider>}
+              {record.course && <CourseDescription>Description: {record.course.description}</CourseDescription>}
+              <CourseDescription>Status: {record.status}</CourseDescription>
+              <CourseDescription>Start date: {new Date(record.startDate).toLocaleDateString()}</CourseDescription>
+              {record.endDate && <CourseDescription>End date: {new Date(record.endDate).toLocaleDateString()}</CourseDescription>}
+              <CourseDescription>Achievement Level: {record.achievementLevel || 'N/A'}</CourseDescription>
+            </CourseBox>
+          ))
+        }
+      </DashboardContainer>
     </Background>
   );
-};
-
-export default TrainingHistory;
+  }
+  
+  export default TrainingHistory;

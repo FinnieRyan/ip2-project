@@ -20,6 +20,14 @@ const port = 5000;
 
 app.use(cors());
 app.use(bodyParser());
+// Swagger UI middleware
+app.use(swagger);
+
+// Routes for Swagger JSON
+router.get('/swagger.json', async (ctx) => {
+  ctx.set('Content-Type', 'application/json');
+  ctx.body = swaggerSpec;
+});
 
 /**
  * @swagger
@@ -333,7 +341,7 @@ router.put('/manager/unenroll', async ctx => {
 router.put('/complete', async ctx => {
   try {
     const user = await User.findOne({ _id: ctx.state.user._id });
-    const { courseId } = ctx.request.body;
+    const { courseId, achievementLevel } = ctx.request.body;
 
     // Get course
     const course = await Course.findOne({ _id: courseId });
@@ -366,6 +374,18 @@ router.put('/complete', async ctx => {
 
       // Mark the course as completed by the employee
       course.completed.push(employee._id);
+
+      // Create a new CourseRecord
+      const courseRecord = new CourseRecord({
+        course: courseId,
+        employee: employee._id,
+        endDate: new Date(),
+        status: 'completed',
+        achievementLevel: achievementLevel
+      });
+
+      await courseRecord.save();
+
     } else if (user.manager_Id) {
       // Handle Manager
       const manager = await Manager.findOne({ _id: user.manager_Id });
@@ -386,6 +406,17 @@ router.put('/complete', async ctx => {
 
       // Mark the course as completed by the manager
       course.completed.push(manager._id);
+
+      // Create a new CourseRecord
+      const courseRecord = new CourseRecord({
+        course: courseId,
+        employee: manager._id,
+        endDate: new Date(),
+        status: 'completed',
+        achievementLevel: achievementLevel
+      });
+
+      await courseRecord.save();
     } else {
       ctx.status = 400;
       ctx.body = { error: 'User is neither an Employee nor a Manager' };
@@ -675,13 +706,17 @@ router.delete('/api/courses/:name', async (ctx) => {
   const { name } = ctx.params;
 
   try {
-    const course = await Course.findOneAndDelete({name: name});
+    const course = await Course.findOne({name: name});
 
     if (!course) {
       ctx.status = 404;
       ctx.body = { error: 'No course found with this name.' };
       return;
     }
+
+      // mark the course as deleted instead of removing it
+      course.isDeleted = true;
+      await course.save();
 
     ctx.status = 200;
     ctx.body = { message: 'Course successfully deleted.' };
@@ -716,35 +751,22 @@ router.delete('/api/courses/:name', async (ctx) => {
 router.get('/api/employee/:employeeId/courseRecords', async ctx => {
   try {
     const { employeeId } = ctx.params;
-    const employee = await Employee.findOne({_id: employeeId});
-    // Check if employee exists
-    if (!employee) {
+
+    // Fetch all the course records for the employee
+    const courseRecords = await CourseRecord
+      .find({ employee: employeeId })
+      .populate('course', 'name provider description');
+
+    if (!courseRecords) {
       ctx.status = 404;
-      ctx.body = { error: 'Employee not found' };
+      ctx.body = { error: 'No course records found for this employee' };
       return;
     }
 
-    // Fetch all the courses the employee has enrolled in
-    const courses = await Course.find({_id: { $in: employee.courses }}).select('name provider description completed');
-
-    // Construct training history
-    const trainingHistory = courses.map(course => {
-      const status = course.completed && course.completed.includes(employeeId) ? 'completed' : 'In-progress';
-      return {
-        course: {
-          name: course.name,
-          provider: course.provider,
-          description: course.description,
-        },
-        employee: employeeId,
-        status: status
-      };
-    });
-
     ctx.status = 200;
-    ctx.body = trainingHistory;
+    ctx.body = courseRecords;
   } catch (error) {
-    console.error('Error fetching training history:', error);
+    console.error('Error fetching course records:', error);
     ctx.status = 500;
     ctx.body = { error: 'Internal Server Error' };
   }
@@ -762,6 +784,8 @@ app.use(async (ctx, next) => {
     ctx.body = { error: 'Internal server error' };
   }
 });
+
+
 
 // Mount the authService middleware
 app.use(authService.router.routes());
@@ -966,15 +990,17 @@ app.use(async (ctx, next) => {
   if (ctx.path === '/api/course') {
     try {
       const departments = ctx.request.headers.departments; // Retrieve the departments from the request headers
-      let courses = [];
 
+      
+      let courses = [];
       if (departments) {
         // If departments are provided in the request headers, filter the courses based on the departments
-        courses = await Course.find({ departments: { $in: departments } });
+        courses = await Course.find({ departments: { $in: departments }, isDeleted: false  });
       } else {
         // If no departments are provided, retrieve all courses
-        courses = await Course.find();
+        courses = await Course.find({ isDeleted: false });
       }
+      console.log(courses);
 
       ctx.status = 200;
       ctx.body = courses;
@@ -1005,12 +1031,6 @@ app.use(async (ctx) => {
   } 
 });
 
-app.use(swagger);
-
-router.get('/swagger.json', async (ctx) => {
-  ctx.set('Content-Type', 'application/json');
-  ctx.body = swaggerSpec;
-});
 
 // Connect to MongoDB
 console.log("connecting to DB");

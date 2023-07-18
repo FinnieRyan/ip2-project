@@ -96,6 +96,7 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   const [employees, setEmployees] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [selectedEmployeeEnrolledCourses, setSelectedEmployeeEnrolledCourses] = useState([]);
+  const [achievementLevel, setAchievementLevel] = useState("");
   // Add loading state
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -167,6 +168,7 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
   //use effect for different fecth requests which are unique to which ever type of employee is logged in.
   //when ever the selected employee token or user role changes this triggers a re-render 
   useEffect(() => {
+    console.log('Courses in useEffect:', courses);
     if (user.role === 'manager') {
       fetchEmployees();
     }
@@ -233,11 +235,11 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
     }
   };
 
-  const completeCourse = async (courseId) => {
+  const completeCourse = async (courseId, achievementLevel) => {
     try {
       //const course = courses.find(course => course._id === courseId);
       //console.log(course.completed); 
-      const response = await axios.put('http://localhost:5000/complete', { courseId }, {
+      const response = await axios.put('http://localhost:5000/complete', { courseId, achievementLevel }, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
   
@@ -334,9 +336,7 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
         )}
 
         {courses && courses.map((course, index) => {
-          /*/console.log(`Course id at index ${index}:`, course._id);
-          console.log(`Enrolled Courses `, enrolledCourses);
-          console.log(typeof course._id);*/
+          console.log('Rendering course:', course);
           return (
             <CourseBox key={index}>
               <CourseTitle>{course.name}</CourseTitle>
@@ -356,7 +356,14 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
                     course.completed && (course.completed.includes(employeeId) || course.completed.includes(managerId)) ? (
                       <CompleteButton disabled>Completed</CompleteButton>
                     ) : (
-                      <CompleteButton onClick={() => completeCourse(course._id)}>Complete</CompleteButton>
+                      <>
+                        <CompleteButton onClick={() => completeCourse(course._id, achievementLevel)}>Complete</CompleteButton>
+                        <StyledSelect value={achievementLevel} onChange={(e) => setAchievementLevel(e.target.value)}>
+                          <option value="">Select Achievement Level</option>
+                          <option value="pass">Pass</option>
+                          <option value="fail">Fail</option>
+                        </StyledSelect>
+                      </>
                     )
                   ) : null}
                 </>
@@ -379,9 +386,10 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
     )}
   </div>
 );
-};
+}
 
 export default CourseList;
+
 
 
 

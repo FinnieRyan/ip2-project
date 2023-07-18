@@ -20,7 +20,8 @@ const CourseRecordSchema = new mongoose.Schema({
     default: 'started'
   },
   achievementLevel: {
-    type: String
+    type: String,
+    enum: ['pass', 'fail']
   }
 });
 
