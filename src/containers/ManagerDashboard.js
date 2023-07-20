@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import CourseList from '../components/CourseList';
 import styled, { keyframes } from 'styled-components';
+import ErrorPage from './ErrorPage';
 
 const slideInFromLeft = keyframes`
   from {
@@ -61,6 +62,7 @@ const ManagerDashboard = () => {
   // Declare state variable courses and its setter function
   const [courses, setCourses] = useState([]);
   const [managerInfo, setManagerInfo] = useState([]);
+  const [unauthorizedAccess, setUnauthorizedAccess] = useState(false);
 
   // Retrieve user data from local storage
   const user = JSON.parse(localStorage.getItem('user'));
@@ -111,14 +113,22 @@ const ManagerDashboard = () => {
       fetchManagersdata();
     }
   }, [token, managerInfo.department]);
+  
+  useEffect(() => {
+    if (user && user.role !== 'manager') {
+      setUnauthorizedAccess(true);
+    }
+  }, [user]);
+
+  if (unauthorizedAccess) {
+    return <ErrorPage />;
 
   // If user or user or token is not present, show loading message
-  if (!user || !token) {
+  } else if (!user || !token) {
     return <p>Loading...</p>;
-  }
-
+  } else {
   // Render manager dashboard UI
-  return (
+    return (
     <Background>
     <DashboardContainer>
       <Heading>Welcome, {managerInfo.firstname}!</Heading>
@@ -129,6 +139,7 @@ const ManagerDashboard = () => {
     </DashboardContainer>
   </Background>
   );
+}
 };
 
 export default ManagerDashboard;

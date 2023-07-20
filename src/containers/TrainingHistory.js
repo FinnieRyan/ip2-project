@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import styled, { keyframes } from 'styled-components';
+import ErrorPage from './ErrorPage';
 
 // Styled Components
 const slideInFromLeft = keyframes`
@@ -68,6 +69,7 @@ const Background = styled.div`
 const TrainingHistory = () => {
   const [trainingHistory, setTrainingHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [unauthorizedAccess, setUnauthorizedAccess] = useState(false);
    //Retrieve user data from local storage
    const user = JSON.parse(localStorage.getItem('user'));
    //Retrieve the users token form local storage 
@@ -95,6 +97,16 @@ const TrainingHistory = () => {
     }
   }, [token, user.role, user.employeeId]);
 
+  useEffect(() => {
+    if (user && user.role !== 'employee') {
+      setUnauthorizedAccess(true);
+    }
+  }, [user]);
+
+  if (unauthorizedAccess) {
+    return <ErrorPage />;
+   } else {
+
   return (
     <Background>
       <DashboardContainer>
@@ -117,6 +129,7 @@ const TrainingHistory = () => {
       </DashboardContainer>
     </Background>
   );
-  }
+ }
+}
   
   export default TrainingHistory;

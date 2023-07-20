@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import CourseList from '../components/CourseList';
 import axios from 'axios';
 import styled, { keyframes } from 'styled-components';
+import ErrorPage from './ErrorPage';
 
 const slideInFromLeft = keyframes`
   from {
@@ -65,6 +66,8 @@ const EmployeeDashboard = () => {
   const [courses, setCourses] = useState([]);
   const [employeeInfo, setEmployeeInfo] = useState([]);
   const [isEmployeeDataFetched, setIsEmployeeDataFetched] = useState(false);
+  const [unauthorizedAccess, setUnauthorizedAccess] = useState(false);
+
 
   const user = JSON.parse(localStorage.getItem('user'));
   const token = localStorage.getItem('myToken');
@@ -116,14 +119,22 @@ const EmployeeDashboard = () => {
   }, [token]);
 
   useEffect(() => {
+    if (user && user.role !== 'employee') {
+      setUnauthorizedAccess(true);
+    }
+  }, [user]);
+
+  useEffect(() => {
     
   }, [courses]);
 
-  if (!user || !token || !isEmployeeDataFetched) {
-    return <p>Loading...</p>;
-  }
+  if (unauthorizedAccess) {
+    return <ErrorPage />;
 
-  return (
+  } else if (!user || !token || !isEmployeeDataFetched) {
+    return <p>Loading...</p>;
+  } else {
+    return (
     <Background>
       <DashboardContainer>
         <Heading>Welcome, {employeeInfo.firstname}!</Heading>
@@ -134,6 +145,7 @@ const EmployeeDashboard = () => {
       </DashboardContainer>
     </Background>
   );
+}
 };
 
 export default EmployeeDashboard;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AddRemoveCoursesForm from '../components/AddRemovesCoursesform';
 import axios from 'axios';
 import styled, { keyframes } from 'styled-components';
+import ErrorPage from './ErrorPage';
 
 const Background = styled.div`
   min-height: 100vh;
@@ -12,6 +13,7 @@ const Background = styled.div`
 
 const AddRemoveCourses = () => {
   const [courses, setCourses] = useState([]);
+  const [unauthorizedAccess, setUnauthorizedAccess] = useState(false);
   //Retrieve user data from local storage
   const user = JSON.parse(localStorage.getItem('user'));
   //Retrieve the users token form local storage 
@@ -35,12 +37,22 @@ const AddRemoveCourses = () => {
   useEffect(() => {
     fetchCourses();
   }, []);
-
+  
+  useEffect(() => {
+    if (user && user.role !== 'manager') {
+      setUnauthorizedAccess(true);
+    }
+  }, [user]);
+  
+  if (unauthorizedAccess) {
+    return <ErrorPage />;
+   } else {
   return (
     <Background>
       <AddRemoveCoursesForm courses={courses} fetchCourses={fetchCourses} />
     </Background>
-  );
+   );
+ }
 };
 
 export default AddRemoveCourses;
