@@ -3,6 +3,7 @@ const axios = require('axios');
 const User = require('../models/user_model'); 
 const jwt = require('jsonwebtoken');
 const Manager = require('../models/manager_model');
+const bcrypt = require('bcrypt');
 
 
 const router = new Router();
@@ -120,11 +121,13 @@ router.post('/login', async (ctx) => {
     const user = await User.findOne({ username: username });
 
     // If user is not found or password is incorrect, respond with authentication failure
-    if (!user || user.password !== password) {
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!user || !passwordMatch) {
       ctx.status = 401;
       ctx.body = { error: 'Invalid username or password' };
       return;
     }
+
     console.log("user role:", user.role);
     let managerId;
       if (user.role === 'manager') {

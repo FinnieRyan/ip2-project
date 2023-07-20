@@ -336,7 +336,6 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
         )}
 
         {courses && courses.map((course, index) => {
-          console.log('Rendering course:', course);
           return (
             <CourseBox key={index}>
               <CourseTitle>{course.name}</CourseTitle>
