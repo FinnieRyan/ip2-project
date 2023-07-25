@@ -99,6 +99,29 @@ const AddRemoveCoursesForm = ({ courses, fetchCourses }) => {
   
 
   const handleAddCourse = async () => {
+    // Validation function
+  const validateInputs = () => {
+    if (!courseName || !courseDescription || !courseProvider || !courseDepartments.length) {
+      let missingFields = '';
+      if (!courseName) missingFields += ' Course name,';
+      if (!courseDescription) missingFields += ' Course description,';
+      if (!courseProvider) missingFields += ' Course provider,';
+      if (!courseDepartments.length) missingFields += ' Course departments,';
+      
+      // Remove the last comma and add a full stop
+      missingFields = missingFields.slice(0, -1) + '.';
+      
+      setMessage(`Please fill in the following fields: ${missingFields}`);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
+      return false;
+    }
+    return true;
+  };
+  
+  if (!validateInputs()) {
+    return;
+  }
     const newCourse = {
       name: courseName,
       description: courseDescription,
@@ -120,6 +143,12 @@ const AddRemoveCoursesForm = ({ courses, fetchCourses }) => {
         setMessageType('success');
         setTimeout(() => setMessage(''), 3000);
         fetchCourses();
+
+        setCourseName('');
+        setCourseDescription('');
+        setCourseProvider('');
+        setCourseDepartments([]);
+
       } else {
         setMessage(response.data.error);
         //console.log(message);
@@ -150,7 +179,7 @@ const AddRemoveCoursesForm = ({ courses, fetchCourses }) => {
         //console.log(message);
         setMessageType('success');
         setTimeout(() => setMessage(''), 3000);
-        fetchCourses();
+        setTimeout(fetchCourses, 1000);
       } else {
         setMessage(response.data.error);
         console.log(message);
@@ -180,7 +209,7 @@ return (
       <FormButton onClick={handleAddCourse}>Add Course</FormButton>
   
       <FormTitle>Remove Course</FormTitle>
-      <Select id="removeCourseSelect">
+      <Select id="removeCourseSelect" data-testid="removeCourseSelect">
         {courses.map((course) => (
             <option key={course._id} value={course.name}>{course.name}</option>
         ))}

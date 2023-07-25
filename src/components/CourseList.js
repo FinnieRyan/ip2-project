@@ -215,6 +215,14 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
 
   // When the unenroll button is clciked the user is unenrolled using the courseId
   const unenrollCourse = async (courseId) => {
+    
+    if (!enrolledCourses.some(course => course._id === courseId)) {
+      setMessage('Cannot unenroll from a course you are not enrolled in!');
+      setMessageType('error')
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
     try {
       const response = await axios.put('http://localhost:5000/unenroll', { courseId }, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -294,7 +302,16 @@ const CourseList = ({ courses, setCourses, onCoursesChange }) => {
 
   //Unenroll button unique to the manager allowing them to unenroll an employee on a course by matching their employeeId
   const managerUnenrollEmployee = async (employeeId, courseId) => {
-    try {
+    
+    // Check if the course is in the list of selected employee's enrolled courses
+  if (!selectedEmployeeEnrolledCourses.some(course => course === courseId)) {
+    setMessage('Cannot unenroll an employee from a course they are not enrolled in!');
+    setMessageType('error')
+    setTimeout(() => setMessage(''), 3000);
+    return;
+  }
+    
+  try {
       const response = await axios.put('http://localhost:5000/manager/unenroll', { employeeId, courseId }, {
         headers: { 'Authorization': `Bearer ${token}` }
       });

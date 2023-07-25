@@ -95,7 +95,7 @@ const EmployeeDashboard = () => {
     if (user && token && isEmployeeDataFetched) {
       fetchCourses();
     }
-  }, [token, isEmployeeDataFetched, employeeInfo.department]);
+  }, [token, isEmployeeDataFetched, employeeInfo.department,]);
 
   useEffect(() => {
     const fetchEmployeedata = async () => {
